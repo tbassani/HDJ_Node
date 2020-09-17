@@ -15,6 +15,7 @@ class HDJPlaylists extends Model {
   static associate(models) {
     this.belongsTo(models.Users, { foreignKey: 'user_id', as: 'user' });
     this.hasMany(models.HDJTracks, { foreignKey: 'id', as: 'tracks' });
+    this.hasMany(models.HDJGroups, { foreignKey: 'hdj_playlist_id', as: 'hdj_group' });
   }
 }
 

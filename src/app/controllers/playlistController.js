@@ -4,6 +4,8 @@ const spotifyConfig = require('../../config/spotify');
 const HDJPlaylists = require('../../models/HDJPlaylists');
 const HDJTracks = require('../../models/HDJTracks');
 const UserHistory = require('../../models/UserHistory');
+const HDJGroups = require('../../models/HDJGroups');
+
 const spotifyUtils = require('../spotifyUtils/spotifyAPI');
 
 const { Op } = require('sequelize');
@@ -19,7 +21,12 @@ module.exports = {
         link: null,
         deleted_at: null,
       });
-      console.log(hdjPlaylist);
+      var hdjGroup = await HDJGroups.create({
+        owner_user_id: req.user_id,
+        member_user_id: null,
+        hdj_playlist_id: hdjPlaylist.dataValues.id,
+        deleted_at: null,
+      });
       var token = await spotifyUtils.getAccessToken(req.user_id);
       console.log('NEW TOKEN');
       console.log(token);
@@ -54,53 +61,66 @@ module.exports = {
   },
   async addToHDJPlaylist(req, res, nex) {
     try {
+      console.log('ADD TO PLAYLIST');
       const { playlists, hdj_playlist_id } = req.body;
-      var token = await spotifyUtils.getAccessToken(req.user_id);
+      var hdjGroup = await HDJGroups.findAll({
+        where: {
+          [Op.or]: [{ owner_user_id: req.user_id }, { member_user_id: req.user_id }],
+          [Op.and]: [{ hdj_playlist_id: hdj_playlist_id }],
+        },
+        raw: true,
+      });
+      console.log(hdjGroup);
+      if (hdjGroup.length > 0) {
+        var token = await spotifyUtils.getAccessToken(req.user_id);
 
-      console.log(token);
-      playlists.items.forEach(async (playlist) => {
-        console.log('PLAYLIST id:' + playlist.id);
-        var spotifyRawTracks = await spotifyUtils.getPlaylistTrack(playlist.id, token);
-        var tracks = spotifyRawTracks.tracks.items;
-        for (const key in tracks) {
-          if (tracks.hasOwnProperty(key)) {
-            const element = tracks[key];
-            console.log('KEY:' + key);
-            const [hdjtrack, created] = await HDJTracks.findOrCreate({
-              where: {
-                playlist_id: hdj_playlist_id,
-                external_track_id: element.track.id,
-              },
-              defaults: {
-                user_id: req.user_id,
-                playlist_id: hdj_playlist_id,
-                external_track_id: element.track.id,
-                score: 0,
-                was_played: false,
-                track_name: element.track.name,
-                duration: element.track.duration_ms,
-                deleted_at: null,
-                album_name: element.track.album.name,
-                album_art: element.track.album.images[0].url,
-                artist_name: element.track.artists[0].name,
-              },
-            });
-            if (!created) {
-              console.log('NOT CREATED');
-              var hdjUpTrack = await HDJTracks.findByPk(hdjtrack.id, { raw: true });
-              console.log(req.user_id);
-              if (req.user_id !== hdjUpTrack.user_id) {
-                console.log('INCREMENT');
-                await HDJTracks.increment('score', {
-                  by: 1,
-                  where: { id: hdjUpTrack.id },
-                });
+        console.log(token);
+        playlists.items.forEach(async (playlist) => {
+          console.log('PLAYLIST id:' + playlist.id);
+          var spotifyRawTracks = await spotifyUtils.getPlaylistTrack(playlist.id, token);
+          var tracks = spotifyRawTracks.tracks.items;
+          for (const key in tracks) {
+            if (tracks.hasOwnProperty(key)) {
+              const element = tracks[key];
+              console.log('KEY:' + key);
+              const [hdjtrack, created] = await HDJTracks.findOrCreate({
+                where: {
+                  playlist_id: hdj_playlist_id,
+                  external_track_id: element.track.id,
+                },
+                defaults: {
+                  user_id: req.user_id,
+                  playlist_id: hdj_playlist_id,
+                  external_track_id: element.track.id,
+                  score: 0,
+                  was_played: false,
+                  track_name: element.track.name,
+                  duration: element.track.duration_ms,
+                  deleted_at: null,
+                  album_name: element.track.album.name,
+                  album_art: element.track.album.images[0].url,
+                  artist_name: element.track.artists[0].name,
+                },
+              });
+              if (!created) {
+                console.log('NOT CREATED');
+                var hdjUpTrack = await HDJTracks.findByPk(hdjtrack.id, { raw: true });
+                console.log(req.user_id);
+                if (req.user_id !== hdjUpTrack.user_id) {
+                  console.log('INCREMENT');
+                  await HDJTracks.increment('score', {
+                    by: 1,
+                    where: { id: hdjUpTrack.id },
+                  });
+                }
               }
             }
           }
-        }
-        res.status(200).json({ success: 'Playlist updated' });
-      });
+          res.status(200).json({ success: 'Playlist updated' });
+        });
+      } else {
+        res.status(400).json({ error: 'User not permited' });
+      }
     } catch (error) {
       res.status(400).json({ error: 'Error updating playlist' });
     }
@@ -108,30 +128,41 @@ module.exports = {
   async upVoteTrack(req, res, next) {
     try {
       const { playlist_id, track_id } = req.body;
-      await HDJTracks.increment('score', {
-        by: 1,
-        where: { id: track_id },
-      });
-      const [userHistory, created] = await UserHistory.findOrCreate({
+      var hdjGroup = await HDJGroups.findAll({
         where: {
-          hdj_playlist_id: playlist_id,
-          hdj_track_id: track_id,
+          [Op.or]: [{ owner_user_id: req.user_id }, { member_user_id: req.user_id }],
+          [Op.and]: [{ hdj_playlist_id: playlist_id }],
         },
-        defaults: {
-          user_id: req.user_id,
-          hdj_track_id: track_id,
-          hdj_playlist_id: playlist_id,
-          up_vote: 1,
-          down_vote: 0,
-        },
+        raw: true,
       });
-      if (!created) {
-        await UserHistory.increment('up_vote', {
+      if (hdjGroup.length > 0) {
+        await HDJTracks.increment('score', {
           by: 1,
-          where: { id: userHistory.id },
+          where: { id: track_id },
         });
+        const [userHistory, created] = await UserHistory.findOrCreate({
+          where: {
+            hdj_playlist_id: playlist_id,
+            hdj_track_id: track_id,
+          },
+          defaults: {
+            user_id: req.user_id,
+            hdj_track_id: track_id,
+            hdj_playlist_id: playlist_id,
+            up_vote: 1,
+            down_vote: 0,
+          },
+        });
+        if (!created) {
+          await UserHistory.increment('up_vote', {
+            by: 1,
+            where: { id: userHistory.id },
+          });
+        }
+        res.status(200).json({ success: `Track liked` });
+      } else {
+        res.status(400).json({ error: 'User not permited' });
       }
-      res.status(200).json({ success: `Track liked` });
     } catch (error) {
       console.log(error);
       res.status(400).json({ error: 'Error on upvote Track' });
@@ -140,30 +171,41 @@ module.exports = {
   async downVoteTrack(req, res, next) {
     try {
       const { playlist_id, track_id } = req.body;
-      await HDJTracks.increment('score', {
-        by: -1,
-        where: { id: track_id },
-      });
-      const [userHistory, created] = await UserHistory.findOrCreate({
+      var hdjGroup = await HDJGroups.findAll({
         where: {
-          hdj_playlist_id: playlist_id,
-          hdj_track_id: track_id,
+          [Op.or]: [{ owner_user_id: req.user_id }, { member_user_id: req.user_id }],
+          [Op.and]: [{ hdj_playlist_id: playlist_id }],
         },
-        defaults: {
-          user_id: req.user_id,
-          hdj_track_id: track_id,
-          hdj_playlist_id: playlist_id,
-          up_vote: 0,
-          down_vote: 1,
-        },
+        raw: true,
       });
-      if (!created) {
-        await UserHistory.increment('down_vote', {
+      if (hdjGroup.length > 0) {
+        await HDJTracks.increment('score', {
           by: -1,
-          where: { id: userHistory.id },
+          where: { id: track_id },
         });
+        const [userHistory, created] = await UserHistory.findOrCreate({
+          where: {
+            hdj_playlist_id: playlist_id,
+            hdj_track_id: track_id,
+          },
+          defaults: {
+            user_id: req.user_id,
+            hdj_track_id: track_id,
+            hdj_playlist_id: playlist_id,
+            up_vote: 0,
+            down_vote: 1,
+          },
+        });
+        if (!created) {
+          await UserHistory.increment('down_vote', {
+            by: -1,
+            where: { id: userHistory.id },
+          });
+        }
+        res.status(200).json({ success: `Track disliked` });
+      } else {
+        res.status(400).json({ error: 'User not permited' });
       }
-      res.status(200).json({ success: `Track disliked` });
     } catch (error) {
       console.log(error);
       res.status(400).json({ error: 'Error creating playlist' });
@@ -171,7 +213,25 @@ module.exports = {
   },
   async getHDJPlaylists(req, res, next) {
     try {
-      var playlists = await HDJPlaylists.findAll({ where: { user_id: req.user_id }, raw: true });
+      var hdjGroup = await HDJGroups.findAll({
+        where: {
+          [Op.or]: [{ owner_user_id: req.user_id }, { member_user_id: req.user_id }],
+        },
+        raw: true,
+      });
+
+      var array = [];
+      var i = 0;
+      hdjGroup.forEach((ids) => {
+        array[i++] = ids.hdj_playlist_id;
+      });
+      console.log(array);
+      var playlists = await HDJPlaylists.findAll({
+        where: {
+          [Op.or]: [{ user_id: req.user_id }, { id: { [Op.in]: array } }],
+        },
+        raw: true,
+      });
       res.status(200).json(playlists);
     } catch (error) {
       console.log(error);
@@ -252,6 +312,27 @@ module.exports = {
     } catch (error) {
       console.log(error);
       res.status(400).json({ error: 'Error deleting playlist' });
+    }
+  },
+  async addToHDJGroups(req, res, next) {
+    try {
+      const { playlist_id, owner_user_id } = req.body;
+      await HDJGroups.findOrCreate({
+        where: {
+          hdj_playlist_id: playlist_id,
+          member_user_id: req.user_id,
+        },
+        defaults: {
+          owner_user_id: owner_user_id,
+          member_user_id: req.user_id,
+          hdj_playlist_id: playlist_id,
+          deleted_at: null,
+        },
+      });
+      res.status(200).json(success, 'User added to group');
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ error: 'Error adding user' });
     }
   },
 };

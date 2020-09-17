@@ -6,6 +6,7 @@ const profiles = require('../models/Profiles');
 const hdjPlaylists = require('../models/HDJPlaylists');
 const hdjTracks = require('../models/HDJTracks');
 const userHistory = require('../models/UserHistory');
+const hdjGroups = require('../models/HDJGroups');
 
 const conn = new Sequelize(dbConfig);
 
@@ -15,5 +16,6 @@ profiles.init(conn);
 hdjPlaylists.init(conn);
 hdjTracks.init(conn);
 userHistory.init(conn);
+hdjGroups.init(conn);
 
 module.exports = conn;

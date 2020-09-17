@@ -3,7 +3,7 @@ const nodeMailer = require('nodemailer');
 
 const ConfirmEmail = require('../../models/ConfirmEmail');
 
-const { host, port, user, pass } = require('../../config/mail');
+const { service, user, pass } = require('../../config/mail');
 const e = require('express');
 
 module.exports = {
@@ -18,17 +18,16 @@ module.exports = {
     });
     try {
       const transport = nodeMailer.createTransport({
-        host,
-        port,
+        service,
         auth: {
           user,
           pass,
         },
       });
       var mailOptions = {
-        from: 'tiagolbassani@gmail.com',
+        from: 'hangthedj.jukebox@gmail.com',
         to: email,
-        subject: 'Sending Email using Node.js',
+        subject: 'Hang the DJ Confirmation',
         text: 'Your confirmation code is: ' + val,
       };
 
@@ -43,7 +42,7 @@ module.exports = {
       });
     } catch (error) {
       console.error(error);
-      next({ error: 'FAiled to send confirmation code' });
+      next({ error: 'Failed to send confirmation code' });
     }
   },
 };

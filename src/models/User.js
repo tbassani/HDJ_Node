@@ -15,6 +15,7 @@ class Users extends Model {
     this.hasMany(models.Profiles, { as: 'profiles' });
     this.hasMany(models.HDJPlaylists, { as: 'hdj_playlists' });
     this.hasMany(models.UserHistory, { as: 'user_history' });
+    this.hasMany(models.HDJGroups, { as: 'user_history' });
   }
 }
 
