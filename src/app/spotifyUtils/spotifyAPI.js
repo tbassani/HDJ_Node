@@ -34,7 +34,7 @@ module.exports = {
         },
       });
       var Users = profile[0];
-      if (Date.now() / 1000 > (await Users.dataValues.token_expiration)) {
+      if (Date.now() / 1000 > Users.dataValues.token_expiration) {
         //fazer chamada de refresh
         const headers = {
           headers: {

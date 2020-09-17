@@ -5,6 +5,7 @@ const confirmEmail = require('../models/ConfirmEmail');
 const profiles = require('../models/Profiles');
 const hdjPlaylists = require('../models/HDJPlaylists');
 const hdjTracks = require('../models/HDJTracks');
+const userHistory = require('../models/UserHistory');
 
 const conn = new Sequelize(dbConfig);
 
@@ -13,5 +14,6 @@ confirmEmail.init(conn);
 profiles.init(conn);
 hdjPlaylists.init(conn);
 hdjTracks.init(conn);
+userHistory.init(conn);
 
 module.exports = conn;

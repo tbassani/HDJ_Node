@@ -18,12 +18,16 @@ module.exports = {
           onDelete: 'CASCADE',
         },
         hdj_track_id: {
-          type: Sequelize.STRING,
+          type: Sequelize.INTEGER,
           allowNull: false,
+          references: { model: 'hdj_tracks', key: 'id' },
+          onDelete: 'CASCADE',
         },
         hdj_playlist_id: {
-          type: Sequelize.STRING,
+          type: Sequelize.INTEGER,
           allowNull: false,
+          references: { model: 'hdj_playlists', key: 'id' },
+          onDelete: 'CASCADE',
         },
         up_vote: {
           type: Sequelize.INTEGER,

@@ -69,6 +69,14 @@ module.exports = {
         });
 
       console.log(display_name);
+      await Profiles.update(
+        { active: false },
+        {
+          where: {
+            user_id: state,
+          },
+        }
+      );
       await Profiles.create({
         user_id: state,
         user_external_id: display_name,

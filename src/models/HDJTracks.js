@@ -1,6 +1,6 @@
 const { DataTypes, Model } = require('sequelize');
 
-class Users extends Model {
+class HDJTracks extends Model {
   static init(sequelize) {
     super.init(
       {
@@ -19,7 +19,8 @@ class Users extends Model {
   }
   static associate(models) {
     this.belongsTo(models.HDJPlaylists, { foreignKey: 'playlist_id', as: 'hdj_playlist' });
+    this.hasMany(models.UserHistory, { foreignKey: 'hdj_track_id', as: 'history' });
   }
 }
 
-module.exports = Users;
+module.exports = HDJTracks;
