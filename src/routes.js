@@ -19,6 +19,8 @@ appRoutes.use(authMiddleware);
 appRoutes
   .get('/spotify/login', spotifyController.login)
   .get('/spotify/playlists', spotifyController.getPlaylists)
+  .put('/spotify/track/play', spotifyController.playTrack)
+  .put('/spotify/track/pause', spotifyController.playTrack)
   .post('/playlist/create', playlistController.createHDJPlaylist)
   .post('/playlist/add', playlistController.addToHDJPlaylist)
   .post('/track/upvote', playlistController.upVoteTrack)

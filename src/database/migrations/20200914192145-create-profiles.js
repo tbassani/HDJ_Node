@@ -38,7 +38,7 @@ module.exports = {
           allowNull: true,
         },
         token_expiration: {
-          type: Sequelize.BIGINT(13),
+          type: Sequelize.BIGINT,
           allowNull: false,
         },
         created_at: {

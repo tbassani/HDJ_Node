@@ -6,8 +6,10 @@ class HDJTracks extends Model {
       {
         user_id: DataTypes.INTEGER,
         playlist_id: DataTypes.INTEGER,
+        track_name: DataTypes.STRING,
         external_track_id: DataTypes.STRING,
         score: DataTypes.INTEGER,
+        was_played: DataTypes.BOOLEAN,
         duration: DataTypes.INTEGER,
         album_name: DataTypes.STRING,
         album_art: DataTypes.STRING,

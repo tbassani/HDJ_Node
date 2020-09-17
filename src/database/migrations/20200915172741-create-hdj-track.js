@@ -11,6 +11,10 @@ module.exports = {
           primaryKey: true,
           allowNull: false,
         },
+        track_name: {
+          type: Sequelize.STRING,
+          allowNull: false,
+        },
         user_id: {
           type: Sequelize.INTEGER,
           allowNull: false,
@@ -30,6 +34,10 @@ module.exports = {
         score: {
           type: Sequelize.INTEGER,
           allowNull: true,
+        },
+        was_played: {
+          type: Sequelize.BOOLEAN,
+          allowNull: false,
         },
         duration: {
           type: Sequelize.INTEGER,

@@ -11,12 +11,11 @@ function generateAuthURL(user_id) {
     spotifyConfig.clientId
   }&response_type=code&redirect_uri=${encodeURI(
     spotifyConfig.redirectUri
-  )}&scope=user-read-private%20user-read-email&state=${user_id}&show_dialog=true`;
+  )}&scope=user-read-private%20user-read-email%20streaming%20app-remote-control%20user-read-currently-playing%20user-read-playback-state%20user-modify-playback-state&state=${user_id}&show_dialog=true`;
 }
 module.exports = {
   async getAuthURL(user_id) {
     try {
-      var scopes = 'user-read-private user-read-email';
       var authorizeURL = generateAuthURL(user_id);
       return authorizeURL;
     } catch (error) {

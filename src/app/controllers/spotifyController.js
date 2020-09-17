@@ -5,13 +5,14 @@ const axios = require('axios');
 const { response } = require('express');
 const Users = require('../../models/User');
 const spotifyUtils = require('../../app/spotifyUtils/spotifyAPI');
+const HDJTracks = require('../../models/HDJTracks');
 
 function generateAuthURL(user_id) {
   return `https://accounts.spotify.com/authorize?client_id=${
     spotifyConfig.clientId
   }&response_type=code&redirect_uri=${encodeURI(
     spotifyConfig.redirectUri
-  )}&scope=user-read-private%20user-read-email&state=${user_id}&show_dialog=true`;
+  )}&scope=user-read-private%20user-read-email%20streaming%20app-remote-control%20user-read-currently-playing%20user-read-playback-state%20user-modify-playback-state&state=${user_id}&show_dialog=true`;
 }
 
 async function refreshAccessToken(user_id, refresh_token, profile_id) {
@@ -33,7 +34,7 @@ async function checkAccessToken() {}
 module.exports = {
   async login(req, res, nex) {
     try {
-      var scopes = 'user-read-private user-read-email';
+      var scopes = 'user-read-private user-read-email user-modify-playback-state';
       var authorizeURL = generateAuthURL(req.user_id);
       res.Authorization = req.headers.authorization;
       res.send(authorizeURL);
@@ -119,6 +120,85 @@ module.exports = {
     } catch (error) {
       console.log(error);
       res.status(400).json({ error: 'Error forming authorization URL' });
+    }
+  },
+  async playTrack(req, res, nex) {
+    try {
+      console.log('!PLAY TRACK');
+      const token = await spotifyUtils.getAccessToken(req.user_id);
+      console.log(token);
+      const { track_id, playlist_id } = req.body;
+      var track = await HDJTracks.findAll({
+        where: {
+          playlist_id: playlist_id,
+          id: track_id,
+        },
+        raw: true,
+      });
+      console.log(token);
+      const headers = {
+        Authorization: 'Bearer ' + token,
+      };
+      const body = {
+        uris: [`spotify:track:${track[0].external_track_id}`],
+      };
+      var display_name;
+      await axios({
+        method: 'PUT',
+        url: 'https://api.spotify.com/v1/me/player/play',
+        headers: headers,
+        data: body,
+      })
+        .then((response) => {
+          console.log(response);
+          res.status(200).json({ success: `Playing Track ${track[0].track_name}` });
+        })
+        .catch((error) => {
+          console.log(error);
+          res.status(400).json({ error: 'Error playing Track' });
+        });
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ error: 'Error playing Track' });
+    }
+  },
+  async pauseTrack(req, res, nex) {
+    try {
+      console.log('!PLAY TRACK');
+      const token = await spotifyUtils.getAccessToken(req.user_id);
+      console.log(token);
+      const { track_id, playlist_id } = req.body;
+      var track = await HDJTracks.findAll({
+        where: {
+          playlist_id: playlist_id,
+          id: track_id,
+        },
+        raw: true,
+      });
+      console.log(token);
+      const headers = {
+        Authorization: 'Bearer ' + token,
+      };
+      const body = {
+        uris: [`spotify:track:${track[0].external_track_id}`],
+      };
+      var display_name;
+      await axios({
+        method: 'PUT',
+        url: 'https://api.spotify.com/v1/me/player/pause',
+        headers: headers,
+      })
+        .then((response) => {
+          console.log(response);
+          res.status(200).json({ success: 'Track paused' });
+        })
+        .catch((error) => {
+          console.log(error);
+          res.status(400).json({ error: 'Error pausing Track' });
+        });
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ error: 'Error pausing Track' });
     }
   },
 };
