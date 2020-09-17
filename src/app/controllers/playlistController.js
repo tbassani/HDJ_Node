@@ -240,4 +240,18 @@ module.exports = {
       res.status(400).json({ error: 'Error getting unvoted tracks' });
     }
   },
+  async deleteHDJPlaylist(req, res, next) {
+    try {
+      const { playlist_id } = req.body;
+      await HDJPlaylists.destroy({
+        where: {
+          id: playlist_id,
+        },
+      });
+      res.status(200).json(success, 'Playlist deleted');
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ error: 'Error deleting playlist' });
+    }
+  },
 };

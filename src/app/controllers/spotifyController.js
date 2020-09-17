@@ -201,4 +201,36 @@ module.exports = {
       res.status(400).json({ error: 'Error pausing Track' });
     }
   },
+  async getPlayingTrack(req, res, nex) {
+    try {
+      const token = await spotifyUtils.getAccessToken(req.user_id);
+      const headers = {
+        Authorization: 'Bearer ' + token,
+      };
+      var display_name;
+      await axios({
+        method: 'GET',
+        url: 'https://api.spotify.com/v1/me/player/currently-playing',
+        headers: headers,
+      })
+        .then((response) => {
+          var track = {
+            artists: response.data.item.artists[0].name,
+            album: response.data.item.album.name,
+            duration: response.data.item.duration_ms,
+            name: response.data.item.name,
+            img: response.data.item.album.images[0].url,
+          };
+          console.log(track);
+          res.status(200).json(track);
+        })
+        .catch((error) => {
+          console.log(error);
+          res.status(400).json({ error: 'Error getting Track' });
+        });
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ error: 'Error pausing Track' });
+    }
+  },
 };
