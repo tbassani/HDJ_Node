@@ -4,6 +4,7 @@ const Users = require('../../models/User');
 const sequelize = require('sequelize');
 
 const ConfirmEmail = require('../../models/ConfirmEmail');
+const Profiles = require('../../models/Profiles');
 
 const authConfig = require('../../config/auth');
 
@@ -16,8 +17,9 @@ function generateToken(params = {}) {
 module.exports = {
   async create(req, res, next) {
     try {
-      const { email, password, code } = req.body;
-
+      console.log('Create new user!');
+      const [email, password, code] = req.body;
+      console.log(email);
       const find_user = await Users.findAll({
         where: {
           email,
@@ -36,55 +38,30 @@ module.exports = {
           code: code,
         },
         order: sequelize.col('created_at'),
+        raw: true,
       });
       console.log(code);
       if (confirmation && confirmation.length > 0) {
-        if (confirmation[0].code !== code) {
+        if (confirmation[0].code.toString() !== code.toString()) {
           return res.status(400).json({ error: 'Incorrect conformation code' });
+        } else {
+          console.log('Correct code');
+          const hash = bcrypt.hashSync(password, 10);
+
+          const user = await Users.create({
+            email: email,
+            password: hash,
+          });
+          return res.json(user);
         }
       } else {
         return res.status(400).json({ error: 'Incorrect conformation code' });
       }
-      const hash = bcrypt.hashSync(password, 10);
-
-      const user = await Users.create({
-        email: email,
-        password: hash,
-      });
-      return res.json(user);
     } catch (error) {
       next({ error: 'Registration failed' });
     }
   },
 
-  async signup(req, res, next) {
-    try {
-      const { email } = req.body;
-
-      const find_user = await Users.findAll({
-        where: {
-          email,
-          deleted_at: null,
-        },
-      });
-      const check_user = find_user[0];
-
-      if (check_user && check_user !== undefined && find_user.length > 0) {
-        return res.status(400).json({ error: 'User already registered' });
-      }
-
-      const hash = bcrypt.hashSync(password, 10);
-
-      const user = await Users.create({
-        email: email,
-        password: hash,
-      });
-      return res.json(user);
-    } catch (error) {
-      console.error(error);
-      next({ error: 'Registration failed' });
-    }
-  },
   async login(req, res, next) {
     try {
       const { email, password } = req.body;
@@ -109,6 +86,23 @@ module.exports = {
       const jwt = generateToken({ id: login_user.id });
       res.status(200).json({
         jwt,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+  async getActiveProfile(req, res, next) {
+    try {
+      const profile = await Profiles.findAll({
+        where: {
+          user_id: req.user_id,
+          active: true,
+        },
+        raw: true,
+      });
+
+      res.status(200).json({
+        profile,
       });
     } catch (error) {
       next(error);
