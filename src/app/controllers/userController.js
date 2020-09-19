@@ -65,13 +65,15 @@ module.exports = {
   async login(req, res, next) {
     try {
       const { email, password } = req.body;
-
+      console.log(req.body);
       const user = await Users.findAll({
         where: {
           email,
           deleted_at: null,
         },
+        raw: true,
       });
+      console.log(user);
       const login_user = user[0];
 
       if (!login_user || login_user === undefined || user.length === 0) {
@@ -86,6 +88,7 @@ module.exports = {
       const jwt = generateToken({ id: login_user.id });
       res.status(200).json({
         jwt,
+        login_user,
       });
     } catch (error) {
       next(error);

@@ -152,6 +152,16 @@ module.exports = {
         .then((response) => {
           console.log(response);
           res.status(200).json({ success: `Playing Track ${track[0].track_name}` });
+
+          HDJTracks.update(
+            { was_played: true },
+            {
+              where: {
+                playlist_id: playlist_id,
+                id: track_id,
+              },
+            }
+          );
         })
         .catch((error) => {
           console.log(error);
