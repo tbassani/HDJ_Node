@@ -27,8 +27,8 @@ module.exports = {
       var mailOptions = {
         from: 'hangthedj.jukebox@gmail.com',
         to: email,
-        subject: 'Hang the DJ Confirmation',
-        text: 'Your confirmation code is: ' + val,
+        subject: 'Hang the DJ',
+        text: 'Seu código de confirmação é: ' + val,
       };
 
       transport.sendMail(mailOptions, function (error, info) {
