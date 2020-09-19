@@ -48,17 +48,18 @@ module.exports = {
           console.log('Correct code');
           const hash = bcrypt.hashSync(password, 10);
 
-          const user = await Users.create({
+          const register_user = await Users.create({
             email: email,
             password: hash,
           });
-          return res.json(user);
+          const jwt = generateToken({ id: register_user.id });
+          return res.json({ jwt, register_user });
         }
       } else {
         return res.status(400).json({ error: 'Incorrect conformation code' });
       }
     } catch (error) {
-      next({ error: 'Registration failed' });
+      return res.status(400).json({ error: 'Registration Failed' });
     }
   },
 
