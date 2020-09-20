@@ -13,7 +13,9 @@ appRoutes
   .post('/user/register', userController.create)
   .post('/user/signup', mailController.confirmation)
   .post('/user/login', userController.login)
-  .get('/spotify/callback', spotifyController.callback);
+  .get('/spotify/callback', spotifyController.callback)
+  .post('/user/forgot_password', mailController.forgotPassword)
+  .post('/user/reset_password', userController.resetPassword);
 
 appRoutes.use(authMiddleware);
 appRoutes

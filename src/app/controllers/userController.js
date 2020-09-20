@@ -112,4 +112,41 @@ module.exports = {
       next(error);
     }
   },
+  async resetPassword(req, res, next) {
+    try {
+      const { email, old_password, new_password } = req.body;
+      console.log(req.body);
+      const user = await Users.findAll({
+        where: {
+          email,
+          deleted_at: null,
+        },
+        raw: true,
+      });
+      console.log(user);
+      const login_user = user[0];
+
+      if (!login_user || login_user === undefined || user.length === 0) {
+        return res.status(400).json({ error: 'User not found' });
+      }
+      if (old_password === login_user.password) {
+        console.log('Update Password');
+        const hash = bcrypt.hashSync(new_password, 10);
+        await Users.update(
+          { password: hash },
+          {
+            where: {
+              email,
+              deleted_at: null,
+            },
+          }
+        );
+        return res.status(200).json({ success: 'Senha alterada' });
+      } else {
+        return res.status(400).json({ error: 'Senha incorreta' });
+      }
+    } catch (error) {
+      next(error);
+    }
+  },
 };
