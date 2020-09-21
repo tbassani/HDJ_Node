@@ -54,7 +54,12 @@ module.exports = {
           }
         }
       });
-      res.status(200).json({ success: `Playlist ${hdjPlaylist.dataValues.id} created` });
+      res
+        .status(200)
+        .json({
+          success: `Playlist ${hdjPlaylist.dataValues.id} created`,
+          id: hdjPlaylist.dataValues.id,
+        });
     } catch (error) {
       res.status(400).json({ error: 'Error creating playlist' });
     }
