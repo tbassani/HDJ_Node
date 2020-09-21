@@ -54,12 +54,10 @@ module.exports = {
           }
         }
       });
-      res
-        .status(200)
-        .json({
-          success: `Playlist ${hdjPlaylist.dataValues.id} created`,
-          id: hdjPlaylist.dataValues.id,
-        });
+      res.status(200).json({
+        success: `Playlist ${hdjPlaylist.dataValues.id} created`,
+        id: hdjPlaylist.dataValues.id,
+      });
     } catch (error) {
       res.status(400).json({ error: 'Error creating playlist' });
     }
@@ -245,7 +243,7 @@ module.exports = {
   },
   async getHDJPlaylistTracks(req, res, next) {
     try {
-      const { playlist_id } = req.body;
+      const { playlist_id } = req.params;
       var tracks = await HDJTracks.findAll({
         where: { playlist_id: playlist_id },
         raw: true,
@@ -259,7 +257,7 @@ module.exports = {
   },
   async getUnvotedHDJTracks(req, res, next) {
     try {
-      const { playlist_id } = req.body;
+      const { playlist_id } = req.params;
       var userHistory = await UserHistory.findAll({
         attributes: ['hdj_track_id'],
         where: {
@@ -305,6 +303,55 @@ module.exports = {
       res.status(400).json({ error: 'Error getting unvoted tracks' });
     }
   },
+  async getNextUnvotedHDJTrack(req, res, next) {
+    try {
+      const { playlist_id } = req.params;
+      var userHistory = await UserHistory.findAll({
+        attributes: ['hdj_track_id'],
+        where: {
+          user_id: req.user_id,
+          hdj_playlist_id: playlist_id,
+        },
+        raw: true,
+      });
+
+      var array = [];
+      var i = 0;
+      userHistory.forEach((track) => {
+        array[i++] = track.hdj_track_id;
+      });
+      console.log(array);
+      var tracks = await HDJTracks.findAll({
+        where: {
+          playlist_id: playlist_id,
+          id: { [Op.notIn]: array },
+          was_played: false,
+        },
+        raw: true,
+        order: [['score', 'DESC']],
+      });
+      if (tracks.length === 0) {
+        tracks = await HDJTracks.findAll({
+          where: {
+            playlist_id: playlist_id,
+          },
+          raw: true,
+          order: [['score', 'DESC']],
+        });
+        await UserHistory.destroy({
+          where: {
+            user_id: req.user_id,
+            hdj_playlist_id: playlist_id,
+          },
+        });
+      }
+      res.status(200).json(tracks[0]);
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ error: 'Error getting unvoted tracks' });
+    }
+  },
+
   async deleteHDJPlaylist(req, res, next) {
     try {
       const { playlist_id } = req.body;

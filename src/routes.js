@@ -30,8 +30,9 @@ appRoutes
   .post('/track/upvote', playlistController.upVoteTrack)
   .post('/track/downvote', playlistController.downVoteTrack)
   .get('/playlists', playlistController.getHDJPlaylists)
-  .get('/playlists/tracks', playlistController.getHDJPlaylistTracks)
+  .get('/playlists/tracks/:playlist_id', playlistController.getHDJPlaylistTracks)
   .delete('/playlists/tracks', playlistController.deleteHDJPlaylist)
-  .get('/playlists/tracks/unvoted', playlistController.getUnvotedHDJTracks)
+  .get('/playlists/tracks/unvoted/:playlist_id', playlistController.getUnvotedHDJTracks)
+  .get('/playlists/track/unvoted/:playlist_id', playlistController.getNextUnvotedHDJTrack)
   .post('/playlists/group/add', playlistController.getUnvotedHDJTracks);
 module.exports = appRoutes;
