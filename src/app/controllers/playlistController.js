@@ -317,11 +317,13 @@ module.exports = {
 
       var array = [];
       var i = 0;
-      userHistory.forEach((track) => {
-        array[i++] = track.hdj_track_id;
-      });
+      if (userHistory && userHistory.length > 0) {
+        userHistory.forEach((track) => {
+          array[i++] = track.hdj_track_id;
+        });
+      }
       console.log(array);
-      var tracks = await HDJTracks.findAll({
+      var tracks = await HDJTracks.findOne({
         where: {
           playlist_id: playlist_id,
           id: { [Op.notIn]: array },
@@ -331,7 +333,7 @@ module.exports = {
         order: [['score', 'DESC']],
       });
       if (tracks.length === 0) {
-        tracks = await HDJTracks.findAll({
+        tracks = await HDJTracks.findOne({
           where: {
             playlist_id: playlist_id,
           },
@@ -345,7 +347,26 @@ module.exports = {
           },
         });
       }
-      res.status(200).json(tracks[0]);
+      res.status(200).json(tracks);
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ error: 'Error getting unvoted tracks' });
+    }
+  },
+
+  async getNextUnplayedHDJTrack(req, res, next) {
+    try {
+      const { playlist_id } = req.params;
+      console.log(array);
+      var tracks = await HDJTracks.findOne({
+        where: {
+          playlist_id: playlist_id,
+          was_played: false,
+        },
+        raw: true,
+        order: [['score', 'DESC']],
+      });
+      res.status(200).json(tracks);
     } catch (error) {
       console.log(error);
       res.status(400).json({ error: 'Error getting unvoted tracks' });

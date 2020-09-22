@@ -10,6 +10,9 @@ const authMiddleware = require('../src/app/midleware/auth');
 const appRoutes = express.Router();
 
 appRoutes
+  .get('/', (req, res) => {
+    res.status(200).send('Bem vindo ao Hang the DJ API');
+  })
   .post('/user/register', userController.create)
   .post('/user/signup', mailController.confirmation)
   .post('/user/login', userController.login)
@@ -34,5 +37,6 @@ appRoutes
   .delete('/playlists/tracks', playlistController.deleteHDJPlaylist)
   .get('/playlists/tracks/unvoted/:playlist_id', playlistController.getUnvotedHDJTracks)
   .get('/playlists/track/unvoted/:playlist_id', playlistController.getNextUnvotedHDJTrack)
+  .get('/playlists/track/unplayed/:playlist_id', playlistController.getNextUnplayedHDJTrack)
   .post('/playlists/group/add', playlistController.getUnvotedHDJTracks);
 module.exports = appRoutes;
