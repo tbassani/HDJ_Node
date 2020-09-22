@@ -332,7 +332,8 @@ module.exports = {
         raw: true,
         order: [['score', 'DESC']],
       });
-      if (tracks.length === 0) {
+      if (!tracks) {
+        console.log('Fim das músicas');
         tracks = await HDJTracks.findOne({
           where: {
             playlist_id: playlist_id,
