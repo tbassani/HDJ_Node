@@ -26,7 +26,7 @@ appRoutes
   .get('/spotify/playlists', spotifyController.getPlaylists)
   .get('/spotify/playing_track', spotifyController.getPlayingTrack)
   .put('/spotify/track/play', spotifyController.playTrack)
-  .put('/spotify/track/pause', spotifyController.playTrack)
+  .put('/spotify/track/pause', spotifyController.pauseTrack)
   .get('/user/profile', userController.getActiveProfile)
   .post('/playlist/create', playlistController.createHDJPlaylist)
   .post('/playlist/add', playlistController.addToHDJPlaylist)
