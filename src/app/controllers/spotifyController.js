@@ -216,7 +216,7 @@ module.exports = {
               track_name: response.data.item.name,
               album_art: response.data.item.album.images[0].url,
               external_track_id: response.data.item.id,
-              is_playing: response.data.isplaying,
+              is_playing: response.data.is_playing,
               progress_ms: response.data.progress_ms,
             };
           }
