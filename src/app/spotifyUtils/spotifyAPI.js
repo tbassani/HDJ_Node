@@ -33,7 +33,7 @@ module.exports = {
         },
       });
       var Users = profile[0];
-      if (Date.now() / 1000 > Users.dataValues.token_expiration) {
+      if (Math.floor(Date.now() / 1000) > Users.dataValues.token_expiration) {
         //fazer chamada de refresh
         const headers = {
           headers: {
@@ -70,6 +70,7 @@ module.exports = {
               resp = response;
             })
             .catch((error) => {
+              console.log('ERROR GETTING TOKEN');
               console.log(error);
             });
           await Profiles.update(
@@ -96,6 +97,7 @@ module.exports = {
       return 'ERROR';
     }
   },
+
   async getPlaylistTrack(playlist_id, access_token) {
     try {
       var resp;

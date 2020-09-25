@@ -49,7 +49,9 @@ module.exports = {
               deleted_at: null,
               album_name: element.track.album.name,
               album_art: element.track.album.images[0].url,
-              artist_name: element.track.artists[0].name,
+              artist_name: element.track.artists[1]
+                ? element.track.artists[0].name + ', ' + element.track.artists[1].name
+                : element.track.artists[0].name,
             });
           }
         }
@@ -102,7 +104,9 @@ module.exports = {
                   deleted_at: null,
                   album_name: element.track.album.name,
                   album_art: element.track.album.images[0].url,
-                  artist_name: element.track.artists[0].name,
+                  artist_name: element.track.artists[1]
+                    ? element.track.artists[0].name + ', ' + element.track.artists[1].name
+                    : element.track.artists[0].name,
                 },
               });
               if (!created) {
@@ -245,10 +249,25 @@ module.exports = {
     try {
       const { playlist_id } = req.params;
       var tracks = await HDJTracks.findAll({
-        where: { playlist_id: playlist_id },
+        where: { playlist_id: playlist_id, was_played: false },
         raw: true,
         order: [['score', 'DESC']],
       });
+      if (!tracks || tracks.length <= 0) {
+        tracks = await HDJTracks.findAll({
+          where: { playlist_id: playlist_id },
+          raw: true,
+          order: [['score', 'DESC']],
+        });
+        HDJTracks.update(
+          { was_played: false },
+          {
+            where: { playlist_id: playlist_id, was_played: true },
+            raw: true,
+            order: [['score', 'DESC']],
+          }
+        );
+      }
       res.status(200).json(tracks);
     } catch (error) {
       console.log(error);
@@ -282,19 +301,20 @@ module.exports = {
         raw: true,
         order: [['score', 'DESC']],
       });
-      if (tracks.length === 0) {
+      if (!tracks || tracks.length === 0) {
+        console.log('NO MORE TRACKS');
+        await UserHistory.destroy({
+          where: {
+            user_id: req.user_id,
+            hdj_playlist_id: playlist_id,
+          },
+        });
         tracks = await HDJTracks.findAll({
           where: {
             playlist_id: playlist_id,
           },
           raw: true,
           order: [['score', 'DESC']],
-        });
-        await UserHistory.destroy({
-          where: {
-            user_id: req.user_id,
-            hdj_playlist_id: playlist_id,
-          },
         });
       }
       res.status(200).json(tracks);
@@ -305,6 +325,7 @@ module.exports = {
   },
   async getNextUnvotedHDJTrack(req, res, next) {
     try {
+      console.log('GET UNVOTED');
       const { playlist_id } = req.params;
       var userHistory = await UserHistory.findAll({
         attributes: ['hdj_track_id'],
@@ -322,8 +343,8 @@ module.exports = {
           array[i++] = track.hdj_track_id;
         });
       }
-      console.log(array);
-      var tracks = await HDJTracks.findOne({
+      console.log(req.body);
+      var tracks = await HDJTracks.findAll({
         where: {
           playlist_id: playlist_id,
           id: { [Op.notIn]: array },
@@ -332,9 +353,9 @@ module.exports = {
         raw: true,
         order: [['score', 'DESC']],
       });
-      if (!tracks) {
+      if (!tracks || tracks.length <= 0) {
         console.log('Fim das músicas');
-        tracks = await HDJTracks.findOne({
+        tracks = await HDJTracks.findAll({
           where: {
             playlist_id: playlist_id,
           },
@@ -348,7 +369,7 @@ module.exports = {
           },
         });
       }
-      res.status(200).json(tracks);
+      res.status(200).json(tracks[0]);
     } catch (error) {
       console.log(error);
       res.status(400).json({ error: 'Error getting unvoted tracks' });
@@ -358,8 +379,7 @@ module.exports = {
   async getNextUnplayedHDJTrack(req, res, next) {
     try {
       const { playlist_id } = req.params;
-      console.log(array);
-      var tracks = await HDJTracks.findOne({
+      var tracks = await HDJTracks.findAll({
         where: {
           playlist_id: playlist_id,
           was_played: false,
@@ -367,7 +387,23 @@ module.exports = {
         raw: true,
         order: [['score', 'DESC']],
       });
-      res.status(200).json(tracks);
+      if (!tracks || tracks.length <= 0) {
+        console.log('Fim das músicas');
+        tracks = await HDJTracks.findAll({
+          where: {
+            playlist_id: playlist_id,
+          },
+          raw: true,
+          order: [['score', 'DESC']],
+        });
+        await UserHistory.destroy({
+          where: {
+            user_id: req.user_id,
+            hdj_playlist_id: playlist_id,
+          },
+        });
+      }
+      res.status(200).json(tracks[0]);
     } catch (error) {
       console.log(error);
       res.status(400).json({ error: 'Error getting unvoted tracks' });

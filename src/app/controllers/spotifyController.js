@@ -34,7 +34,6 @@ async function checkAccessToken() {}
 module.exports = {
   async login(req, res, nex) {
     try {
-      var scopes = 'user-read-private user-read-email user-modify-playback-state';
       var authorizeURL = generateAuthURL(req.user_id);
       res.Authorization = req.headers.authorization;
       res.send(authorizeURL);
@@ -52,7 +51,6 @@ module.exports = {
       };
       var spotifyApi = new SpotifyWebApi(credentials);
       var data = await spotifyApi.authorizationCodeGrant(code);
-      console.log('BODY------------------------------');
       const headers = {
         Authorization: 'Bearer ' + data.body['access_token'],
       };
@@ -115,7 +113,7 @@ module.exports = {
           display_name = response.data.display_name;
         })
         .catch((error) => {
-          console.log(error);
+          console.log(error.response.status);
         });
     } catch (error) {
       console.log(error);
@@ -124,25 +122,24 @@ module.exports = {
   },
   async playTrack(req, res, nex) {
     try {
-      console.log('!PLAY TRACK');
+      console.log('PLAY TRACK');
       const token = await spotifyUtils.getAccessToken(req.user_id);
       console.log(token);
       const { track_id, playlist_id } = req.body;
+      console.log(req.body);
       var track = await HDJTracks.findAll({
         where: {
           playlist_id: playlist_id,
-          id: track_id,
+          external_track_id: track_id,
         },
         raw: true,
       });
-      console.log(token);
       const headers = {
         Authorization: 'Bearer ' + token,
       };
       const body = {
         uris: [`spotify:track:${track[0].external_track_id}`],
       };
-      var display_name;
       await axios({
         method: 'PUT',
         url: 'https://api.spotify.com/v1/me/player/play',
@@ -150,7 +147,6 @@ module.exports = {
         data: body,
       })
         .then((response) => {
-          console.log(response);
           res.status(200).json({ success: `Playing Track ${track[0].track_name}` });
 
           HDJTracks.update(
@@ -158,7 +154,7 @@ module.exports = {
             {
               where: {
                 playlist_id: playlist_id,
-                id: track_id,
+                external_track_id: track_id,
               },
             }
           );
@@ -174,35 +170,21 @@ module.exports = {
   },
   async pauseTrack(req, res, nex) {
     try {
-      console.log('!PLAY TRACK');
+      console.log('PAUSE TRACK');
       const token = await spotifyUtils.getAccessToken(req.user_id);
-      console.log(token);
-      const { track_id, playlist_id } = req.body;
-      var track = await HDJTracks.findAll({
-        where: {
-          playlist_id: playlist_id,
-          id: track_id,
-        },
-        raw: true,
-      });
-      console.log(token);
       const headers = {
         Authorization: 'Bearer ' + token,
       };
-      const body = {
-        uris: [`spotify:track:${track[0].external_track_id}`],
-      };
-      var display_name;
       await axios({
         method: 'PUT',
         url: 'https://api.spotify.com/v1/me/player/pause',
         headers: headers,
       })
         .then((response) => {
-          console.log(response);
           res.status(200).json({ success: 'Track paused' });
         })
         .catch((error) => {
+          console.log('ERROR FROM PAUSE');
           console.log(error);
           res.status(400).json({ error: 'Error pausing Track' });
         });
@@ -217,29 +199,59 @@ module.exports = {
       const headers = {
         Authorization: 'Bearer ' + token,
       };
-      var display_name;
+      var track = {};
       await axios({
         method: 'GET',
         url: 'https://api.spotify.com/v1/me/player/currently-playing',
         headers: headers,
       })
         .then((response) => {
-          var track = {
-            artists: response.data.item.artists[0].name,
-            album: response.data.item.album.name,
-            duration: response.data.item.duration_ms,
-            name: response.data.item.name,
-            img: response.data.item.album.images[0].url,
-          };
-          console.log(track);
+          if (response.data.item) {
+            track = {
+              artist_name: response.data.item.artists[1]
+                ? response.data.item.artists[0].name + ', ' + response.data.item.artists[1].name
+                : response.data.item.artists[0].name,
+              album_name: response.data.item.album.name,
+              duration: response.data.item.duration_ms,
+              track_name: response.data.item.name,
+              album_art: response.data.item.album.images[0].url,
+              external_track_id: response.data.item.id,
+            };
+          }
           res.status(200).json(track);
         })
         .catch((error) => {
           console.log(error);
           res.status(400).json({ error: 'Error getting Track' });
         });
+      console.log('GOT TRACK');
     } catch (error) {
       console.log(error);
+      res.status(400).json({ error: 'Error pausing Track' });
+    }
+  },
+  async getPlaybackState(req, res, next) {
+    try {
+      var resp;
+      const token = await spotifyUtils.getAccessToken(req.user_id);
+      const headers = {
+        Authorization: 'Bearer ' + token,
+      };
+      await axios({
+        method: 'GET',
+        url: 'https://api.spotify.com/v1/me/player',
+        headers: headers,
+      })
+        .then((response) => {
+          data = response.data;
+          resp = data;
+        })
+        .catch((error) => {
+          console.log('ERROR');
+          console.log(error);
+        });
+      res.status(200).json(resp);
+    } catch (error) {
       res.status(400).json({ error: 'Error pausing Track' });
     }
   },
