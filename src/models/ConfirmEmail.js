@@ -8,7 +8,13 @@ class ConfirmEmail extends Model {
         code: DataTypes.INTEGER,
         deleted_at: DataTypes.DATE,
       },
-      { sequelize, tableName: 'confirm_email' }
+      {
+        sequelize,
+        tableName: 'confirm_email',
+        timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: 'updated_at',
+      }
     );
   }
 }

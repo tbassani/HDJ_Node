@@ -8,7 +8,7 @@ const hdjTracks = require('../models/HDJTracks');
 const userHistory = require('../models/UserHistory');
 const hdjGroups = require('../models/HDJGroups');
 
-const conn = new Sequelize(dbConfig);
+const conn = new Sequelize(process.env.DB_URL);
 
 users.init(conn);
 confirmEmail.init(conn);

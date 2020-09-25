@@ -16,7 +16,13 @@ class HDJTracks extends Model {
         artist_name: DataTypes.STRING,
         deleted_at: DataTypes.DATE,
       },
-      { sequelize, tableName: 'hdj_tracks' }
+      {
+        sequelize,
+        tableName: 'hdj_tracks',
+        timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: 'updated_at',
+      }
     );
   }
   static associate(models) {

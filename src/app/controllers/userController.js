@@ -18,7 +18,7 @@ module.exports = {
   async create(req, res, next) {
     try {
       console.log('Create new user!');
-      const [email, password, code] = req.body;
+      const { email, password, code } = req.body;
       console.log(email);
       const find_user = await Users.findAll({
         where: {
@@ -59,6 +59,7 @@ module.exports = {
         return res.status(400).json({ error: 'Incorrect conformation code' });
       }
     } catch (error) {
+      console.log(error);
       return res.status(400).json({ error: 'Registration Failed' });
     }
   },

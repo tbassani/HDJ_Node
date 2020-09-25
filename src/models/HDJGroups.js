@@ -9,7 +9,13 @@ class HDJGroups extends Model {
         hdj_playlist_id: DataTypes.INTEGER,
         deleted_at: DataTypes.DATE,
       },
-      { sequelize, tableName: 'hdj_groups' }
+      {
+        sequelize,
+        tableName: 'hdj_groups',
+        timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: 'updated_at',
+      }
     );
   }
   static associate(models) {

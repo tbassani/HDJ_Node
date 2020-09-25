@@ -10,7 +10,13 @@ class UserHistory extends Model {
         up_vote: DataTypes.INTEGER,
         down_vote: DataTypes.INTEGER,
       },
-      { sequelize, tableName: 'user_history' }
+      {
+        sequelize,
+        tableName: 'user_history',
+        timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: 'updated_at',
+      }
     );
   }
   static associate(models) {

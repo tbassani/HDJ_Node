@@ -8,7 +8,13 @@ class Users extends Model {
         password: DataTypes.STRING,
         deleted_at: DataTypes.DATE,
       },
-      { sequelize, tableName: 'users' }
+      {
+        sequelize,
+        tableName: 'users',
+        timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: 'updated_at',
+      }
     );
   }
   static associate(models) {

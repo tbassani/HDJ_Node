@@ -13,7 +13,13 @@ class Profiles extends Model {
         active: DataTypes.BOOLEAN,
         deleted_at: DataTypes.DATE,
       },
-      { sequelize, tableName: 'profiles' }
+      {
+        sequelize,
+        tableName: 'profiles',
+        timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: 'updated_at',
+      }
     );
   }
   static associate(models) {

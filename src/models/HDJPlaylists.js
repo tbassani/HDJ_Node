@@ -9,7 +9,13 @@ class HDJPlaylists extends Model {
         link: DataTypes.STRING,
         deleted_at: DataTypes.DATE,
       },
-      { sequelize, tableName: 'hdj_playlists' }
+      {
+        sequelize,
+        tableName: 'hdj_playlists',
+        timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: 'updated_at',
+      }
     );
   }
   static associate(models) {
