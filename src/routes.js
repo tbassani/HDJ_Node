@@ -24,7 +24,7 @@ appRoutes.use(authMiddleware);
 appRoutes
   .get('/spotify/login', spotifyController.login)
   .get('/spotify/playlists', spotifyController.getPlaylists)
-  .get('/spotify/playing_track', spotifyController.getPlayingTrack)
+  .get('/spotify/playing_track/:playlist_id', spotifyController.getPlayingTrack)
   .post('/spotify/track/play', spotifyController.playTrack)
   .post('/spotify/track/pause', spotifyController.pauseTrack)
   .get('/spotify/playback_state', spotifyController.getPlaybackState)

@@ -6,6 +6,7 @@ const { response } = require('express');
 const Users = require('../../models/User');
 const spotifyUtils = require('../../app/spotifyUtils/spotifyAPI');
 const HDJTracks = require('../../models/HDJTracks');
+const HDJPlaylists = require('../../models/HDJPlaylists');
 
 function generateAuthURL(user_id) {
   return `https://accounts.spotify.com/authorize?client_id=${
@@ -195,38 +196,45 @@ module.exports = {
   },
   async getPlayingTrack(req, res, nex) {
     try {
-      const token = await spotifyUtils.getAccessToken(req.user_id);
-      const headers = {
-        Authorization: 'Bearer ' + token,
-      };
-      var track = {};
-      await axios({
-        method: 'GET',
-        url: 'https://api.spotify.com/v1/me/player/currently-playing',
-        headers: headers,
-      })
-        .then((response) => {
-          if (response.data.item) {
-            track = {
-              artist_name: response.data.item.artists[1]
-                ? response.data.item.artists[0].name + ', ' + response.data.item.artists[1].name
-                : response.data.item.artists[0].name,
-              album_name: response.data.item.album.name,
-              duration: response.data.item.duration_ms,
-              track_name: response.data.item.name,
-              album_art: response.data.item.album.images[0].url,
-              external_track_id: response.data.item.id,
-              is_playing: response.data.is_playing,
-              progress_ms: response.data.progress_ms,
-            };
-          }
-          res.status(200).json(track);
+      const { playlist_id } = req.params;
+      const response = await HDJPlaylists.findByPk(playlist_id);
+      console.log(response);
+      if (!response || response.length <= 0) {
+        res.status(400).json({ error: 'Error getting Track' });
+      } else {
+        const token = await spotifyUtils.getAccessToken(response.dataValues.user_id);
+        const headers = {
+          Authorization: 'Bearer ' + token,
+        };
+        var track = {};
+        await axios({
+          method: 'GET',
+          url: 'https://api.spotify.com/v1/me/player/currently-playing',
+          headers: headers,
         })
-        .catch((error) => {
-          console.log(error);
-          res.status(400).json({ error: 'Error getting Track' });
-        });
-      console.log('GOT TRACK');
+          .then((response) => {
+            if (response.data.item) {
+              track = {
+                artist_name: response.data.item.artists[1]
+                  ? response.data.item.artists[0].name + ', ' + response.data.item.artists[1].name
+                  : response.data.item.artists[0].name,
+                album_name: response.data.item.album.name,
+                duration: response.data.item.duration_ms,
+                track_name: response.data.item.name,
+                album_art: response.data.item.album.images[0].url,
+                external_track_id: response.data.item.id,
+                is_playing: response.data.is_playing,
+                progress_ms: response.data.progress_ms,
+              };
+            }
+            res.status(200).json(track);
+          })
+          .catch((error) => {
+            console.log(error);
+            res.status(400).json({ error: 'Error getting Track' });
+          });
+        console.log('GOT TRACK');
+      }
     } catch (error) {
       console.log(error);
       res.status(400).json({ error: 'Error getting Track' });
