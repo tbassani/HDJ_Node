@@ -426,20 +426,25 @@ module.exports = {
   },
   async addToHDJGroups(req, res, next) {
     try {
-      const { playlist_id, owner_user_id } = req.body;
-      await HDJGroups.findOrCreate({
-        where: {
-          hdj_playlist_id: playlist_id,
-          member_user_id: req.user_id,
-        },
-        defaults: {
-          owner_user_id: owner_user_id,
-          member_user_id: req.user_id,
-          hdj_playlist_id: playlist_id,
-          deleted_at: null,
-        },
-      });
-      res.status(200).json(success, 'User added to group');
+      const { playlist_id } = req.body;
+      const playlist = await HDJPlaylists.findByPk(playlist_id);
+      if (!playlist || playlist.length <= 0) {
+        res.status(400).json({ error: 'Playlist does not exist' });
+      } else {
+        await HDJGroups.findOrCreate({
+          where: {
+            hdj_playlist_id: playlist_id,
+            member_user_id: req.user_id,
+          },
+          defaults: {
+            owner_user_id: playlist.user_id,
+            member_user_id: req.user_id,
+            hdj_playlist_id: playlist_id,
+            deleted_at: null,
+          },
+        });
+        res.status(200).json({ success: 'User added to group' });
+      }
     } catch (error) {
       console.log(error);
       res.status(400).json({ error: 'Error adding user' });
