@@ -229,7 +229,7 @@ module.exports = {
       console.log('GOT TRACK');
     } catch (error) {
       console.log(error);
-      res.status(400).json({ error: 'Error pausing Track' });
+      res.status(400).json({ error: 'Error getting Track' });
     }
   },
   async getPlaybackState(req, res, next) {
