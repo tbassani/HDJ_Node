@@ -445,4 +445,34 @@ module.exports = {
       res.status(400).json({ error: 'Error adding user' });
     }
   },
+
+  async resetHDJPlaylist(req, res, nex) {
+    try {
+      const { hdj_playlist_id } = req.body;
+      const hdjPlaylist = HDJPlaylists.findAll({
+        where: {
+          user_id: req.user_id,
+          id: hdj_playlist_id,
+        },
+        raw: true,
+      });
+      if (!hdjPlaylist || hdjPlaylist.length <= 0) {
+        console.log('Essa playlist não existe ou não pertence ao usuário');
+        res.status(400).json({ error: 'Error updating playlist' });
+      } else {
+        console.log('Resetar playlist');
+        const tracks = HDJTracks.update(
+          { score: 0, was_played: false },
+          {
+            where: {
+              playlist_id: hdj_playlist_id,
+            },
+          }
+        );
+        res.status(200).json(success, 'Playlist Updated');
+      }
+    } catch (error) {
+      res.status(400).json({ error: 'Error updating playlist' });
+    }
+  },
 };
