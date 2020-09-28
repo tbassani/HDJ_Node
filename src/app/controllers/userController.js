@@ -25,10 +25,12 @@ module.exports = {
           email,
           deleted_at: null,
         },
+        raw: true,
       });
-      const check_user = find_user[0];
 
-      if (check_user && check_user !== undefined && find_user.length > 0) {
+      const check_user = find_user[0];
+      console.log(check_user);
+      if (check_user && check_user !== undefined && check_user.id > 0) {
         return res.status(400).json({ error: 'User already registered' });
       }
 
