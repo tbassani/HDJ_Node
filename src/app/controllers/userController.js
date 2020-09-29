@@ -42,7 +42,8 @@ module.exports = {
         order: sequelize.col('created_at'),
         raw: true,
       });
-      console.log(code);
+      console.log('CONFIRMATION');
+      console.log(confirmation);
       if (confirmation && confirmation.length > 0) {
         if (confirmation[0].code.toString() !== code.toString()) {
           return res.status(400).json({ error: 'Incorrect conformation code' });

@@ -198,7 +198,7 @@ module.exports = {
     try {
       const { playlist_id } = req.params;
       const response = await HDJPlaylists.findByPk(playlist_id);
-      console.log(response);
+      //console.log(response);
       if (!response || response.length <= 0) {
         res.status(400).json({ error: 'Error getting Track' });
       } else {
