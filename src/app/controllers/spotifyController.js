@@ -88,7 +88,7 @@ module.exports = {
         deleted_at: null,
       });
 
-      res.status(200).send('Welcome!');
+      res.status(200).send('Bem vindo ao Hang the DJ! Você já pode fechar esta janela.');
     } catch (err) {
       console.log(err);
       res.redirect('/#/error/invalid token');
