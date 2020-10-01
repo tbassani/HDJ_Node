@@ -9,6 +9,7 @@ const HDJGroups = require('../../models/HDJGroups');
 const spotifyUtils = require('../spotifyUtils/spotifyAPI');
 
 const { Op } = require('sequelize');
+const Sequelize = require('sequelize');
 
 module.exports = {
   async createHDJPlaylist(req, res, nex) {
@@ -351,7 +352,7 @@ module.exports = {
           was_played: false,
         },
         raw: true,
-        order: 'random()',
+        order: [Sequelize.fn('RAND')],
       });
       if (!tracks || tracks.length <= 0) {
         console.log('Fim das músicas');
@@ -360,7 +361,7 @@ module.exports = {
             playlist_id: playlist_id,
           },
           raw: true,
-          order: 'random()',
+          order: [Sequelize.fn('RAND')],
         });
         await UserHistory.destroy({
           where: {
