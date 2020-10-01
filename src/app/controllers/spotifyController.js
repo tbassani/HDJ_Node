@@ -272,7 +272,6 @@ module.exports = {
     console.log(query);
     const q = query;
     var tracks = [];
-    var artists = [];
     var playlists = [];
     try {
       const token = await spotifyUtils.getAccessToken(req.user_id);
@@ -287,7 +286,7 @@ module.exports = {
         headers: headers,
         params: {
           q,
-          type: 'playlist,track,artist',
+          type: 'playlist,track',
         },
       })
         .then((response) => {
@@ -305,27 +304,19 @@ module.exports = {
               });
             });
           }
-          if (response.data.artists.items) {
-            response.data.artists.items.forEach((element) => {
-              tracks.push({
-                artist_name: element.name,
-                artist_art: element.images[0],
-                external_artist_id: element.id,
-              });
-            });
-          }
 
           if (response.data.playlists.items) {
             response.data.playlists.items.forEach((element) => {
-              tracks.push({
+              playlists.push({
                 artist_name: element.name,
                 playlist_art: element.images[0],
                 external_playlist_id: element.id,
+                tracks: element.tracks.href,
               });
             });
           }
 
-          res.status(200).json({ tracks, playlists, artists });
+          res.status(200).json({ tracks, playlists });
         })
         .catch((error) => {
           console.log(error);
