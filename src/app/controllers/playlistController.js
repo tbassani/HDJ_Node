@@ -360,7 +360,7 @@ module.exports = {
             playlist_id: playlist_id,
           },
           raw: true,
-          order: [['score', 'DESC']],
+          order: 'random()',
         });
         await UserHistory.destroy({
           where: {
