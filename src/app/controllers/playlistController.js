@@ -352,7 +352,7 @@ module.exports = {
           was_played: false,
         },
         raw: true,
-        order: [Sequelize.fn('RAND')],
+        order: [[Sequelize.fn('RANDOM')]],
       });
       if (!tracks || tracks.length <= 0) {
         console.log('Fim das músicas');
@@ -361,7 +361,7 @@ module.exports = {
             playlist_id: playlist_id,
           },
           raw: true,
-          order: [Sequelize.fn('RAND')],
+          order: [[Sequelize.fn('RANDOM')]],
         });
         await UserHistory.destroy({
           where: {
