@@ -351,7 +351,7 @@ module.exports = {
           was_played: false,
         },
         raw: true,
-        order: [['score', 'DESC']],
+        order: 'random()',
       });
       if (!tracks || tracks.length <= 0) {
         console.log('Fim das músicas');

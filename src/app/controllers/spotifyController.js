@@ -265,4 +265,75 @@ module.exports = {
       res.status(400).json({ error: 'Error pausing Track' });
     }
   },
+
+  async searchPlaylistsAndTracks(req, res, nex) {
+    console.log('SEARCH');
+    const { query } = req.params;
+    console.log(query);
+    const q = query;
+    var tracks = [];
+    var artists = [];
+    var playlists = [];
+    try {
+      const token = await spotifyUtils.getAccessToken(req.user_id);
+      console.log(token);
+      const headers = {
+        Authorization: 'Bearer ' + token,
+      };
+      var display_name;
+      await axios({
+        method: 'GET',
+        url: 'https://api.spotify.com/v1/search',
+        headers: headers,
+        params: {
+          q,
+          type: 'playlist,track,artist',
+        },
+      })
+        .then((response) => {
+          console.log(response.data);
+          if (response.data.tracks.items) {
+            response.data.tracks.items.forEach((element) => {
+              tracks.push({
+                artists: element.artists[1]
+                  ? element.artists[0].name + ', ' + element.artists[1].name
+                  : element.artists[0].name,
+                duration: element.duration_ms,
+                track_name: element.name,
+                album_art: element.album.images[0].url,
+                external_track_id: element.id,
+              });
+            });
+          }
+          if (response.data.artists.items) {
+            response.data.artists.items.forEach((element) => {
+              tracks.push({
+                artist_name: element.name,
+                artist_art: element.images[0],
+                external_artist_id: element.id,
+              });
+            });
+          }
+
+          if (response.data.playlists.items) {
+            response.data.playlists.items.forEach((element) => {
+              tracks.push({
+                artist_name: element.name,
+                playlist_art: element.images[0],
+                external_playlist_id: element.id,
+              });
+            });
+          }
+
+          res.status(200).json({ tracks, playlists, artists });
+        })
+        .catch((error) => {
+          console.log(error);
+          res.status(400).json({ error: 'Error on Search' });
+        });
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ error: 'Error on Search' });
+    }
+  },
 };

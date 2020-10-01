@@ -28,6 +28,7 @@ appRoutes
   .post('/spotify/track/play', spotifyController.playTrack)
   .post('/spotify/track/pause', spotifyController.pauseTrack)
   .get('/spotify/playback_state', spotifyController.getPlaybackState)
+  .get('/spotify/search/:query', spotifyController.searchPlaylistsAndTracks)
   .get('/user/profile', userController.getActiveProfile)
   .post('/playlist/create', playlistController.createHDJPlaylist)
   .post('/playlist/add', playlistController.addToHDJPlaylist)
