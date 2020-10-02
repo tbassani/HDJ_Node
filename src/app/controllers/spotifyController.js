@@ -291,7 +291,7 @@ module.exports = {
           },
         })
           .then((response) => {
-            console.log(response.data);
+            console.log(response.data.playlists);
             if (response.data.tracks.items) {
               response.data.tracks.items.forEach((element) => {
                 tracks.push({
@@ -310,7 +310,7 @@ module.exports = {
             if (response.data.playlists.items) {
               response.data.playlists.items.forEach((element) => {
                 playlists.push({
-                  artist_name: element.name,
+                  playlist_name: element.name,
                   playlist_art: element.images[0],
                   external_playlist_id: element.id,
                   tracks: element.tracks.href,
