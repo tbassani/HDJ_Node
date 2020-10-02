@@ -319,11 +319,11 @@ module.exports = {
             ret = [
               {
                 title: 'Músicas',
-                content: tracks,
+                data: tracks,
               },
               {
                 title: 'Playlists',
-                content: playlists,
+                data: playlists,
               },
             ];
             res.status(200).json(ret);
