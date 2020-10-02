@@ -303,6 +303,7 @@ module.exports = {
                   album_art: element.album.images[0].url,
                   external_track_id: element.id,
                   type: 'track',
+                  selectedClass: false,
                 });
               });
             }
