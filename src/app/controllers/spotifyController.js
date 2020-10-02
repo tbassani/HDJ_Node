@@ -221,7 +221,7 @@ module.exports = {
                 album_name: response.data.item.album.name,
                 duration: response.data.item.duration_ms,
                 track_name: response.data.item.name,
-                album_art: response.data.item.album.images[0]?.url,
+                album_art: response.data.item.album.images[0].url,
                 external_track_id: response.data.item.id,
                 is_playing: response.data.is_playing,
                 progress_ms: response.data.progress_ms,
@@ -300,7 +300,7 @@ module.exports = {
                     : element.artists[0].name,
                   duration: element.duration_ms,
                   track_name: element.name,
-                  album_art: element.album.images[0]?.url,
+                  album_art: element.album.images[0].url,
                   external_track_id: element.id,
                   type: 'track',
                 });
@@ -361,7 +361,7 @@ module.exports = {
                 const element = items[key];
                 playlists.push({
                   playlist_name: element.name,
-                  playlist_art: element.images[0]?.url,
+                  playlist_art: element.images[0].url,
                   external_playlist_id: element.id,
                   tracks: element.tracks.href,
                   type: 'playlist',
