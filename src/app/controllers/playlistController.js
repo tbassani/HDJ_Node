@@ -65,6 +65,79 @@ module.exports = {
       res.status(400).json({ error: 'Error creating playlist' });
     }
   },
+  async mixHDJPlaylist(req, res, nex) {
+    try {
+      console.log('MIX HDJ PLAYLIST');
+      const { playlists, tracks, name } = req.body;
+      console.log(req.body);
+      var hdjPlaylist = await HDJPlaylists.create({
+        user_id: req.user_id,
+        playlist_name: name,
+        link: null,
+        deleted_at: null,
+      });
+      var hdjGroup = await HDJGroups.create({
+        owner_user_id: req.user_id,
+        member_user_id: null,
+        hdj_playlist_id: hdjPlaylist.dataValues.id,
+        deleted_at: null,
+      });
+      var token = await spotifyUtils.getAccessToken(req.user_id);
+      console.log('NEW TOKEN');
+      console.log(token);
+      tracks.items.forEach(async (track) => {
+        console.log('TRACK id:' + track.id);
+        var spotifyRawTrack = await spotifyUtils.getTrack(track.id, token);
+        await HDJTracks.create({
+          user_id: req.user_id,
+          playlist_id: hdjPlaylist.dataValues.id,
+          external_track_id: spotifyRawTrack.id,
+          score: 0,
+          track_name: spotifyRawTrack.name,
+          was_played: false,
+          duration: spotifyRawTrack.duration_ms,
+          deleted_at: null,
+          album_name: spotifyRawTrack.album.name,
+          album_art: spotifyRawTrack.album.images[0].url,
+          artist_name: spotifyRawTrack.artists[1]
+            ? spotifyRawTrack.artists[0].name + ', ' + spotifyRawTrack.artists[1].name
+            : spotifyRawTrack.artists[0].name,
+        });
+        playlists.items.forEach(async (playlist) => {
+          console.log('PLAYLIST id:' + playlist.id);
+          var spotifyRawTracks = await spotifyUtils.getPlaylistTrack(playlist.id, token);
+          var tracks = spotifyRawTracks.tracks.items;
+          for (const key in tracks) {
+            if (tracks.hasOwnProperty(key)) {
+              const element = tracks[key];
+              //console.log(element);
+              await HDJTracks.create({
+                user_id: req.user_id,
+                playlist_id: hdjPlaylist.dataValues.id,
+                external_track_id: element.track.id,
+                score: 0,
+                track_name: element.track.name,
+                was_played: false,
+                duration: element.track.duration_ms,
+                deleted_at: null,
+                album_name: element.track.album.name,
+                album_art: element.track.album.images[0].url,
+                artist_name: element.track.artists[1]
+                  ? element.track.artists[0].name + ', ' + element.track.artists[1].name
+                  : element.track.artists[0].name,
+              });
+            }
+          }
+        });
+      });
+      res.status(200).json({
+        success: `Playlist ${hdjPlaylist.dataValues.id} created`,
+        id: hdjPlaylist.dataValues.id,
+      });
+    } catch (error) {
+      res.status(400).json({ error: 'Error creating playlist' });
+    }
+  },
   async addToHDJPlaylist(req, res, nex) {
     try {
       console.log('ADD TO PLAYLIST');
