@@ -368,7 +368,7 @@ module.exports = {
                 });
               }
             }
-            res.status(200).json(playlists);
+            res.status(200).json({ title: 'Playlists', data: playlists });
             display_name = response.data.display_name;
           })
           .catch((error) => {
