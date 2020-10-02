@@ -221,7 +221,7 @@ module.exports = {
                 album_name: response.data.item.album.name,
                 duration: response.data.item.duration_ms,
                 track_name: response.data.item.name,
-                album_art: response.data.item.album.images[0].url,
+                album_art: response.data.item.album.images[0]?.url,
                 external_track_id: response.data.item.id,
                 is_playing: response.data.is_playing,
                 progress_ms: response.data.progress_ms,
@@ -300,7 +300,7 @@ module.exports = {
                     : element.artists[0].name,
                   duration: element.duration_ms,
                   track_name: element.name,
-                  album_art: element.album.images[0].url,
+                  album_art: element.album.images[0]?.url,
                   external_track_id: element.id,
                   type: 'track',
                 });
@@ -339,7 +339,45 @@ module.exports = {
         res.status(400).json({ error: 'Error on Search' });
       }
     } else {
-      this.getPlaylists(req, res, nex);
+      console.log('Sem query');
+      try {
+        const token = await spotifyUtils.getAccessToken(req.user_id);
+        console.log(token);
+        const headers = {
+          Authorization: 'Bearer ' + token,
+        };
+        var playlists = [];
+        var display_name;
+        await axios({
+          method: 'GET',
+          url: 'https://api.spotify.com/v1/me/playlists',
+          headers: headers,
+        })
+          .then((response) => {
+            console.log(response.data);
+            const { items } = response.data;
+            for (const key in items) {
+              if (items.hasOwnProperty(key)) {
+                const element = items[key];
+                playlists.push({
+                  playlist_name: element.name,
+                  playlist_art: element.images[0]?.url,
+                  external_playlist_id: element.id,
+                  tracks: element.tracks.href,
+                  type: 'playlist',
+                });
+              }
+            }
+            res.status(200).json(playlists);
+            display_name = response.data.display_name;
+          })
+          .catch((error) => {
+            console.log(error.response.status);
+          });
+      } catch (error) {
+        console.log(error);
+        res.status(400).json({ error: 'Error forming authorization URL' });
+      }
     }
   },
 };
