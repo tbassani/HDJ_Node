@@ -270,6 +270,7 @@ module.exports = {
     console.log('SEARCH');
     const { query } = req.params;
     console.log(query);
+    var ret = {};
     const q = query;
     var tracks = [];
     var playlists = [];
@@ -315,8 +316,17 @@ module.exports = {
               });
             });
           }
-
-          res.status(200).json({ tracks, playlists });
+          ret = [
+            {
+              title: 'Músicas',
+              content: tracks,
+            },
+            {
+              title: 'Playlists',
+              content: playlists,
+            },
+          ];
+          res.status(200).json(ret);
         })
         .catch((error) => {
           console.log(error);
