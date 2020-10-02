@@ -302,6 +302,7 @@ module.exports = {
                   track_name: element.name,
                   album_art: element.album.images[0].url,
                   external_track_id: element.id,
+                  type: 'track',
                 });
               });
             }
@@ -313,6 +314,7 @@ module.exports = {
                   playlist_art: element.images[0],
                   external_playlist_id: element.id,
                   tracks: element.tracks.href,
+                  type: 'playlist',
                 });
               });
             }
