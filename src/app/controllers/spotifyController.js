@@ -313,7 +313,7 @@ module.exports = {
               response.data.playlists.items.forEach((element) => {
                 playlists.push({
                   playlist_name: element.name,
-                  playlist_art: element.images[0].url,
+                  playlist_art: element.images[0] ? element.images[0].url : '',
                   external_playlist_id: element.id,
                   tracks: element.tracks.href,
                   type: 'playlist',
