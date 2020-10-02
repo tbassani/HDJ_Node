@@ -303,7 +303,8 @@ module.exports = {
                   album_art: element.album.images[0].url,
                   external_track_id: element.id,
                   type: 'track',
-                  selectedClass: false,
+                  selectedClass: null,
+                  isSelected: false,
                 });
               });
             }
@@ -316,7 +317,8 @@ module.exports = {
                   external_playlist_id: element.id,
                   tracks: element.tracks.href,
                   type: 'playlist',
-                  selectedClass: false,
+                  selectedClass: null,
+                  isSelected: false,
                 });
               });
             }
