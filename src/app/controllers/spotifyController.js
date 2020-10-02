@@ -315,6 +315,7 @@ module.exports = {
                   external_playlist_id: element.id,
                   tracks: element.tracks.href,
                   type: 'playlist',
+                  selectedClass: false,
                 });
               });
             }
@@ -365,6 +366,7 @@ module.exports = {
                   external_playlist_id: element.id,
                   tracks: element.tracks.href,
                   type: 'playlist',
+                  selectedClass: false,
                 });
               }
             }
