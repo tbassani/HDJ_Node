@@ -368,7 +368,9 @@ module.exports = {
                 });
               }
             }
-            res.status(200).json({ title: 'Playlists', data: playlists });
+            var ret = [];
+            ret.push({ title: 'Playlists', data: playlists });
+            res.status(200).json(ret);
             display_name = response.data.display_name;
           })
           .catch((error) => {
