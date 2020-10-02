@@ -267,7 +267,7 @@ module.exports = {
   },
 
   async searchPlaylistsAndTracks(req, res, nex) {
-    const { query } = req.params;
+    const { query } = req.query;
     if (query && query !== '') {
       console.log(query);
       var ret = {};
