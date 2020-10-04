@@ -103,33 +103,34 @@ module.exports = {
             ? spotifyRawTrack.artists[0].name + ', ' + spotifyRawTrack.artists[1].name
             : spotifyRawTrack.artists[0].name,
         });
-        playlists.items.forEach(async (playlist) => {
-          console.log('PLAYLIST id:' + playlist.id);
-          var spotifyRawTracks = await spotifyUtils.getPlaylistTrack(playlist.id, token);
-          var tracks = spotifyRawTracks.tracks.items;
-          for (const key in tracks) {
-            if (tracks.hasOwnProperty(key)) {
-              const element = tracks[key];
-              //console.log(element);
-              await HDJTracks.create({
-                user_id: req.user_id,
-                playlist_id: hdjPlaylist.dataValues.id,
-                external_track_id: element.track.id,
-                score: 0,
-                track_name: element.track.name,
-                was_played: false,
-                duration: element.track.duration_ms,
-                deleted_at: null,
-                album_name: element.track.album.name,
-                album_art: element.track.album.images[0].url,
-                artist_name: element.track.artists[1]
-                  ? element.track.artists[0].name + ', ' + element.track.artists[1].name
-                  : element.track.artists[0].name,
-              });
-            }
-          }
-        });
       });
+      playlists.items.forEach(async (playlist) => {
+        console.log('PLAYLIST id:' + playlist.id);
+        var spotifyRawTracks = await spotifyUtils.getPlaylistTrack(playlist.id, token);
+        var tracks = spotifyRawTracks.tracks.items;
+        for (const key in tracks) {
+          if (tracks.hasOwnProperty(key)) {
+            const element = tracks[key];
+            //console.log(element);
+            await HDJTracks.create({
+              user_id: req.user_id,
+              playlist_id: hdjPlaylist.dataValues.id,
+              external_track_id: element.track.id,
+              score: 0,
+              track_name: element.track.name,
+              was_played: false,
+              duration: element.track.duration_ms,
+              deleted_at: null,
+              album_name: element.track.album.name,
+              album_art: element.track.album.images[0].url,
+              artist_name: element.track.artists[1]
+                ? element.track.artists[0].name + ', ' + element.track.artists[1].name
+                : element.track.artists[0].name,
+            });
+          }
+        }
+      });
+
       res.status(200).json({
         success: `Playlist ${hdjPlaylist.dataValues.id} created`,
         id: hdjPlaylist.dataValues.id,
@@ -141,7 +142,7 @@ module.exports = {
   async addToHDJPlaylist(req, res, nex) {
     try {
       console.log('ADD TO PLAYLIST');
-      const { playlists, hdj_playlist_id } = req.body;
+      const { playlists, tracks, hdj_playlist_id } = req.body;
       var hdjGroup = await HDJGroups.findAll({
         where: {
           [Op.or]: [{ owner_user_id: req.user_id }, { member_user_id: req.user_id }],
@@ -152,7 +153,43 @@ module.exports = {
       console.log(hdjGroup);
       if (hdjGroup.length > 0) {
         var token = await spotifyUtils.getAccessToken(req.user_id);
-
+        tracks.items.forEach(async (track) => {
+          console.log('TRACK id:' + track.id);
+          var spotifyRawTrack = await spotifyUtils.getTrack(track.id, token);
+          const [hdjtrack, created] = await HDJTracks.findOrCreate({
+            where: {
+              playlist_id: hdj_playlist_id,
+              external_track_id: element.track.id,
+            },
+            defaults: {
+              user_id: req.user_id,
+              playlist_id: hdjPlaylist.dataValues.id,
+              external_track_id: spotifyRawTrack.id,
+              score: 0,
+              track_name: spotifyRawTrack.name,
+              was_played: false,
+              duration: spotifyRawTrack.duration_ms,
+              deleted_at: null,
+              album_name: spotifyRawTrack.album.name,
+              album_art: spotifyRawTrack.album.images[0].url,
+              artist_name: spotifyRawTrack.artists[1]
+                ? spotifyRawTrack.artists[0].name + ', ' + spotifyRawTrack.artists[1].name
+                : spotifyRawTrack.artists[0].name,
+            },
+          });
+          if (!created) {
+            console.log('NOT CREATED');
+            var hdjUpTrack = await HDJTracks.findByPk(hdjtrack.id, { raw: true });
+            console.log(req.user_id);
+            if (req.user_id !== hdjUpTrack.user_id) {
+              console.log('INCREMENT');
+              await HDJTracks.increment('score', {
+                by: 1,
+                where: { id: hdjUpTrack.id },
+              });
+            }
+          }
+        });
         console.log(token);
         playlists.items.forEach(async (playlist) => {
           console.log('PLAYLIST id:' + playlist.id);
