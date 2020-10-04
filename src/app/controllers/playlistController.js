@@ -159,11 +159,11 @@ module.exports = {
           const [hdjtrack, created] = await HDJTracks.findOrCreate({
             where: {
               playlist_id: hdj_playlist_id,
-              external_track_id: element.track.id,
+              external_track_id: spotifyRawTrack.id,
             },
             defaults: {
               user_id: req.user_id,
-              playlist_id: hdjPlaylist.dataValues.id,
+              playlist_id: hdj_playlist_id,
               external_track_id: spotifyRawTrack.id,
               score: 0,
               track_name: spotifyRawTrack.name,
@@ -234,12 +234,13 @@ module.exports = {
               }
             }
           }
-          res.status(200).json({ success: 'Playlist updated' });
         });
+        res.status(200).json({ success: 'Playlist updated' });
       } else {
         res.status(400).json({ error: 'User not permited' });
       }
     } catch (error) {
+      console.log9(error);
       res.status(400).json({ error: 'Error updating playlist' });
     }
   },
