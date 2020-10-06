@@ -176,7 +176,7 @@ module.exports = {
           headers: headers,
         })
           .then((response) => {
-            res.status(200).json({ success: `Playing Track ${track[0].track_name}` });
+            res.status(200).json({ success: `Playing Track` });
           })
           .catch((error) => {
             console.log(error);
