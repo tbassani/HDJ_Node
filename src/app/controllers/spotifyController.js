@@ -128,43 +128,61 @@ module.exports = {
       const token = await spotifyUtils.getAccessToken(req.user_id);
       console.log(token);
       const { track_id, playlist_id } = req.body;
-      console.log(req.body);
-      var track = await HDJTracks.findAll({
-        where: {
-          playlist_id: playlist_id,
-          external_track_id: track_id,
-        },
-        raw: true,
-      });
-      const headers = {
-        Authorization: 'Bearer ' + token,
-      };
-      const body = {
-        uris: [`spotify:track:${track[0].external_track_id}`],
-      };
-      await axios({
-        method: 'PUT',
-        url: 'https://api.spotify.com/v1/me/player/play',
-        headers: headers,
-        data: body,
-      })
-        .then((response) => {
-          res.status(200).json({ success: `Playing Track ${track[0].track_name}` });
-
-          HDJTracks.update(
-            { was_played: true },
-            {
-              where: {
-                playlist_id: playlist_id,
-                external_track_id: track_id,
-              },
-            }
-          );
-        })
-        .catch((error) => {
-          console.log(error);
-          res.status(400).json({ error: 'Error playing Track' });
+      if (track_id) {
+        console.log(req.body);
+        var track = await HDJTracks.findAll({
+          where: {
+            playlist_id: playlist_id,
+            external_track_id: track_id,
+          },
+          raw: true,
         });
+        const headers = {
+          Authorization: 'Bearer ' + token,
+        };
+        const body = {
+          uris: [`spotify:track:${track[0].external_track_id}`],
+        };
+        await axios({
+          method: 'PUT',
+          url: 'https://api.spotify.com/v1/me/player/play',
+          headers: headers,
+          data: body,
+        })
+          .then((response) => {
+            res.status(200).json({ success: `Playing Track ${track[0].track_name}` });
+
+            HDJTracks.update(
+              { was_played: true },
+              {
+                where: {
+                  playlist_id: playlist_id,
+                  external_track_id: track_id,
+                },
+              }
+            );
+          })
+          .catch((error) => {
+            console.log(error);
+            res.status(400).json({ error: 'Error playing Track' });
+          });
+      } else {
+        const headers = {
+          Authorization: 'Bearer ' + token,
+        };
+        await axios({
+          method: 'PUT',
+          url: 'https://api.spotify.com/v1/me/player/play',
+          headers: headers,
+        })
+          .then((response) => {
+            res.status(200).json({ success: `Playing Track ${track[0].track_name}` });
+          })
+          .catch((error) => {
+            console.log(error);
+            res.status(400).json({ error: 'Error playing Track' });
+          });
+      }
     } catch (error) {
       console.log(error);
       res.status(400).json({ error: 'Error playing Track' });
