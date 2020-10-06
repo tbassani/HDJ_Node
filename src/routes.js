@@ -32,6 +32,7 @@ appRoutes
   .get('/user/profile', userController.getActiveProfile)
   .post('/playlist/create', playlistController.createHDJPlaylist)
   .post('/playlist/mix', playlistController.mixHDJPlaylist)
+  .post('/spotify/add_to_queue', spotifyController.addTracksToQueue)
   .post('/playlist/add', playlistController.addToHDJPlaylist)
   .post('/track/upvote', playlistController.upVoteTrack)
   .post('/track/downvote', playlistController.downVoteTrack)

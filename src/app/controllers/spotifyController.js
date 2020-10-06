@@ -7,6 +7,7 @@ const Users = require('../../models/User');
 const spotifyUtils = require('../../app/spotifyUtils/spotifyAPI');
 const HDJTracks = require('../../models/HDJTracks');
 const HDJPlaylists = require('../../models/HDJPlaylists');
+const UserHistory = require('../../models/UserHistory');
 
 function generateAuthURL(user_id) {
   return `https://accounts.spotify.com/authorize?client_id=${
@@ -263,6 +264,78 @@ module.exports = {
       res.status(200).json(resp);
     } catch (error) {
       res.status(400).json({ error: 'Error pausing Track' });
+    }
+  },
+
+  async addTracksToQueue(req, res, nex) {
+    try {
+      var duration = 0;
+      console.log('ADD TRACKS TO QUEUE');
+      const token = await spotifyUtils.getAccessToken(req.user_id);
+      console.log(token);
+      var i = 0;
+      const { playlist_id } = req.body;
+      const headers = {
+        Authorization: 'Bearer ' + token,
+      };
+      var tracks = await HDJTracks.findAll({
+        where: {
+          playlist_id: playlist_id,
+          was_played: false,
+        },
+        raw: true,
+        order: [['score', 'DESC']],
+      });
+      if (!tracks || tracks.length <= 0) {
+        console.log('Fim das músicas');
+        tracks = await HDJTracks.findAll({
+          where: {
+            playlist_id: playlist_id,
+          },
+          raw: true,
+          order: [['score', 'DESC']],
+        });
+        await UserHistory.destroy({
+          where: {
+            user_id: req.user_id,
+            hdj_playlist_id: playlist_id,
+          },
+        });
+      }
+
+      //console.log(tracks);
+      while (duration <= 100000) {
+        var uri_data = {
+          uri: `spotify:track:${tracks[i].external_track_id}`,
+        };
+        console.log('Adding track: ' + tracks[i].track_name);
+        duration = duration + tracks[i].duration;
+        axios({
+          method: 'POST',
+          url: 'https://api.spotify.com/v1/me/player/queue',
+          headers: headers,
+          params: uri_data,
+        })
+          .then((response) => {})
+          .catch((error) => {
+            console.log(error);
+            res.status(400).json({ error: 'Error adding Track' });
+          });
+        HDJTracks.update(
+          { was_played: true },
+          {
+            where: {
+              playlist_id: playlist_id,
+              external_track_id: tracks[i].external_track_id,
+            },
+          }
+        );
+        i++;
+      }
+      res.status(200).json({ success: 'tracks added' });
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ error: 'Error adding Track' });
     }
   },
 
