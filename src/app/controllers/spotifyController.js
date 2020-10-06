@@ -287,7 +287,7 @@ module.exports = {
 
   async addTracksToQueue(req, res, nex) {
     try {
-      var duration = 0;
+      //Inicialização de variáveis
       console.log('ADD TRACKS TO QUEUE');
       const token = await spotifyUtils.getAccessToken(req.user_id);
       console.log(token);
@@ -296,6 +296,8 @@ module.exports = {
       const headers = {
         Authorization: 'Bearer ' + token,
       };
+      var duration = 0;
+      var queue = [];
       var tracks = await HDJTracks.findAll({
         where: {
           playlist_id: playlist_id,
@@ -304,40 +306,51 @@ module.exports = {
         raw: true,
         order: [['score', 'DESC']],
       });
-      if (!tracks || tracks.length <= 0) {
-        console.log('Fim das músicas');
-        tracks = await HDJTracks.findAll({
+      tracks.forEach((element) => {
+        duration = duration + element.duration;
+        if (duration < 1200000) {
+          queue.push(element);
+        }
+      });
+      if (duration < 1200000) {
+        var old_tracks = await HDJTracks.findAll({
           where: {
             playlist_id: playlist_id,
           },
           raw: true,
           order: [['score', 'DESC']],
         });
-        await HDJTracks.update(
-          { was_played: false },
-          {
-            where: {
-              playlist_id: playlist_id,
-              was_played: true,
-            },
-            raw: true,
+        old_tracks.forEach((old_element) => {
+          if (duration < 1200000) {
+            queue.push(old_element);
+            duration = duration + old_element.duration;
           }
-        );
-        await UserHistory.destroy({
-          where: {
-            user_id: req.user_id,
-            hdj_playlist_id: playlist_id,
-          },
         });
+        if (!tracks || tracks.length <= 0) {
+          await HDJTracks.update(
+            { was_played: false },
+            {
+              where: {
+                playlist_id: playlist_id,
+                was_played: true,
+              },
+              raw: true,
+            }
+          );
+          await UserHistory.destroy({
+            where: {
+              user_id: req.user_id,
+              hdj_playlist_id: playlist_id,
+            },
+          });
+        }
       }
-
-      //console.log(tracks);
-      while (duration <= 120000) {
+      queue.forEach((element) => {
         var uri_data = {
-          uri: `spotify:track:${tracks[i].external_track_id}`,
+          uri: `spotify:track:${element.external_track_id}`,
         };
-        console.log('Adding track: ' + tracks[i].track_name);
-        duration = duration + tracks[i].duration;
+        console.log('Adding track: ' + element.track_name);
+        duration = duration + element.duration;
         axios({
           method: 'POST',
           url: 'https://api.spotify.com/v1/me/player/queue',
@@ -349,17 +362,19 @@ module.exports = {
             console.log(error);
             res.status(400).json({ error: 'Error adding Track' });
           });
-        HDJTracks.update(
-          { was_played: true },
-          {
-            where: {
-              playlist_id: playlist_id,
-              external_track_id: tracks[i].external_track_id,
-            },
-          }
-        );
-        i++;
-      }
+      });
+      var ids = [];
+      queue.forEach((element) => {
+        ids.push(element.id);
+      });
+      await HDJTracks.update(
+        { was_played: true },
+        {
+          where: {
+            id: ids,
+          },
+        }
+      );
       res.status(200).json({ success: 'tracks added' });
     } catch (error) {
       console.log(error);
