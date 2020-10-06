@@ -313,6 +313,16 @@ module.exports = {
           raw: true,
           order: [['score', 'DESC']],
         });
+        await HDJTracks.update(
+          { was_played: false },
+          {
+            where: {
+              playlist_id: playlist_id,
+              was_played: true,
+            },
+            raw: true,
+          }
+        );
         await UserHistory.destroy({
           where: {
             user_id: req.user_id,
@@ -322,7 +332,7 @@ module.exports = {
       }
 
       //console.log(tracks);
-      while (duration <= 100000) {
+      while (duration <= 120000) {
         var uri_data = {
           uri: `spotify:track:${tracks[i].external_track_id}`,
         };
