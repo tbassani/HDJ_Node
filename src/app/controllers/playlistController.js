@@ -363,7 +363,7 @@ module.exports = {
       var tracks = await HDJTracks.findAll({
         where: { playlist_id: playlist_id, was_played: false },
         raw: true,
-        order: [['score', 'DESC']],
+        order: [[Sequelize.fn('max', sequelize.col('score')), 'DESC']],
       });
       if (!tracks || tracks.length <= 0) {
         tracks = await HDJTracks.findAll({
