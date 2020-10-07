@@ -50,7 +50,7 @@ module.exports = {
       });
     } catch (error) {
       console.error(error);
-      next({ error: 'Failed to send confirmation code' });
+      res.status(400).json({ error: 'Falha ao enviar código' });
     }
   },
 
@@ -102,11 +102,11 @@ module.exports = {
           }
         });
       } else {
-        res.status(200).json({ error: 'User does not exist' });
+        res.status(400).json({ error: 'Usuário não existe' });
       }
     } catch (error) {
       console.error(error);
-      next({ error: 'Failed to send confirmation code' });
+      res.status(400).json({ error: 'Falha ao enviar e-mail' });
     }
   },
 };
