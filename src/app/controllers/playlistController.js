@@ -363,20 +363,20 @@ module.exports = {
       var tracks = await HDJTracks.findAll({
         where: { playlist_id: playlist_id, was_played: false },
         raw: true,
-        order: [['score', 'ASC']],
+        order: [['score', 'DESC']],
       });
       if (!tracks || tracks.length <= 0) {
         tracks = await HDJTracks.findAll({
           where: { playlist_id: playlist_id },
           raw: true,
-          order: [['score', 'ASC']],
+          order: [['score', 'DESC']],
         });
         await HDJTracks.update(
           { was_played: false },
           {
             where: { playlist_id: playlist_id, was_played: true },
             raw: true,
-            order: [['score', 'ASC']],
+            order: [['score', 'DESC']],
           }
         );
       }
