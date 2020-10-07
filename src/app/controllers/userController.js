@@ -31,7 +31,7 @@ module.exports = {
       const check_user = find_user[0];
       console.log(check_user);
       if (check_user && check_user !== undefined && check_user.id > 0) {
-        return res.status(400).json({ error: 'User already registered' });
+        return res.status(400).json({ error: 'Usuário já cadastrado!' });
       }
 
       const confirmation = await ConfirmEmail.findAll({
@@ -46,7 +46,7 @@ module.exports = {
       console.log(confirmation);
       if (confirmation && confirmation.length > 0) {
         if (confirmation[0].code.toString() !== code.toString()) {
-          return res.status(400).json({ error: 'Incorrect conformation code' });
+          return res.status(400).json({ error: 'Código incorreto' });
         } else {
           console.log('Correct code');
           const hash = bcrypt.hashSync(password, 10);
@@ -59,11 +59,11 @@ module.exports = {
           return res.json({ jwt, register_user });
         }
       } else {
-        return res.status(400).json({ error: 'Incorrect conformation code' });
+        return res.status(400).json({ error: 'Código incorreto' });
       }
     } catch (error) {
       console.log(error);
-      return res.status(400).json({ error: 'Registration Failed' });
+      return res.status(400).json({ error: 'Falha no registro. Tente novamente.' });
     }
   },
 
@@ -82,12 +82,12 @@ module.exports = {
       const login_user = user[0];
 
       if (!login_user || login_user === undefined || user.length === 0) {
-        return res.status(400).json({ error: 'User not found' });
+        return res.status(400).json({ error: 'Usuário não encontrado' });
       }
 
       if (!(await bcrypt.compare(password, login_user.password))) {
         console.log('400-----------------------------------');
-        return res.status(400).json({ error: 'Invalid password' });
+        return res.status(400).json({ error: 'Senha inválida' });
       }
 
       const jwt = generateToken({ id: login_user.id });
@@ -131,7 +131,7 @@ module.exports = {
       const login_user = user[0];
 
       if (!login_user || login_user === undefined || user.length === 0) {
-        return res.status(400).json({ error: 'User not found' });
+        return res.status(400).json({ error: 'Usuário não encontrado' });
       }
       if (old_password === login_user.password) {
         console.log('Update Password');
