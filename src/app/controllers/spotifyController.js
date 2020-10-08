@@ -382,7 +382,6 @@ module.exports = {
         var uri_data = {
           uri: `spotify:track:${track_id}`,
         };
-        console.log('Adding track: ' + element.track_name);
         axios({
           method: 'POST',
           url: 'https://api.spotify.com/v1/me/player/queue',
@@ -398,7 +397,7 @@ module.exports = {
           { was_played: true },
           {
             where: {
-              external_track_idid: track_id,
+              external_track_id: track_id,
             },
           }
         );
