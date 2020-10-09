@@ -7,6 +7,7 @@ const UserHistory = require('../../models/UserHistory');
 const HDJGroups = require('../../models/HDJGroups');
 
 const spotifyUtils = require('../spotifyUtils/spotifyAPI');
+const analytics = require('../analyticsUtils/analytics');
 
 const { Op } = require('sequelize');
 const Sequelize = require('sequelize');
@@ -57,6 +58,7 @@ module.exports = {
           }
         }
       });
+      analytics.logAction('Criar Playlist', req.user_id);
       res.status(200).json({
         success: `Playlist ${hdjPlaylist.dataValues.id} created`,
         id: hdjPlaylist.dataValues.id,
@@ -130,7 +132,7 @@ module.exports = {
           }
         }
       });
-
+      analytics.logAction('Criar Playlist', req.user_id);
       res.status(200).json({
         success: `Playlist ${hdjPlaylist.dataValues.id} created`,
         id: hdjPlaylist.dataValues.id,
@@ -235,6 +237,7 @@ module.exports = {
             }
           }
         });
+        analytics.logAction('Adiconar à Playlist', req.user_id);
         res.status(200).json({ success: 'Playlist updated' });
       } else {
         res.status(400).json({ error: 'User not permited' });
@@ -278,6 +281,7 @@ module.exports = {
             where: { id: userHistory.id },
           });
         }
+        analytics.logAction('Votar', req.user_id);
         res.status(200).json({ success: `Track liked` });
       } else {
         res.status(400).json({ error: 'User not permited' });
@@ -321,6 +325,7 @@ module.exports = {
             where: { id: userHistory.id },
           });
         }
+        analytics.logAction('Votar', req.user_id);
         res.status(200).json({ success: `Track disliked` });
       } else {
         res.status(400).json({ error: 'User not permited' });
@@ -546,6 +551,7 @@ module.exports = {
         },
         raw: true,
       });
+      analytics.logAction('Deletar Playlist', req.user_id);
       res.status(200).json(success, 'Playlist deleted');
     } catch (error) {
       console.log(error);
@@ -571,6 +577,7 @@ module.exports = {
             deleted_at: null,
           },
         });
+        analytics.logAction('Adicionar ao Grupo', req.user_id);
         res.status(200).json({ success: 'User added to group' });
       }
     } catch (error) {
@@ -602,6 +609,7 @@ module.exports = {
             },
           }
         );
+        analytics.logAction('Resetar Playlist', req.user_id);
         res.status(200).json(success, 'Playlist Updated');
       }
     } catch (error) {

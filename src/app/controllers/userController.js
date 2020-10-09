@@ -8,6 +8,8 @@ const Profiles = require('../../models/Profiles');
 
 const authConfig = require('../../config/auth');
 
+const analytics = require('../analyticsUtils/analytics');
+
 function generateToken(params = {}) {
   return jwt.sign(params, authConfig.secret, {
     expiresIn: authConfig.token_exp,
@@ -51,10 +53,15 @@ module.exports = {
           console.log('Correct code');
           const hash = bcrypt.hashSync(password, 10);
 
-          const register_user = await Users.create({
-            email: email,
-            password: hash,
-          });
+          const register_user = await Users.create(
+            {
+              email: email,
+              password: hash,
+            },
+            { raw: true }
+          );
+          console.log(register_user.id);
+          await analytics.logAction('Cadastrar', register_user.id);
           const jwt = generateToken({ id: register_user.id });
           return res.json({ jwt, register_user });
         }
@@ -91,6 +98,7 @@ module.exports = {
       }
 
       const jwt = generateToken({ id: login_user.id });
+      analytics.logAction('Logar', login_user.id);
       res.status(200).json({
         jwt,
         login_user,
