@@ -540,6 +540,12 @@ module.exports = {
           id: playlist_id,
         },
       });
+      await HDJTracks.destroy({
+        where: {
+          playlist_id: playlist_id,
+        },
+        raw: true,
+      });
       res.status(200).json(success, 'Playlist deleted');
     } catch (error) {
       console.log(error);
