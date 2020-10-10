@@ -38,6 +38,7 @@ appRoutes
   .post('/track/downvote', playlistController.downVoteTrack)
   .get('/playlists', playlistController.getHDJPlaylists)
   .get('/playlists/tracks/:playlist_id', playlistController.getHDJPlaylistTracks)
+  .get('/playlists/search_tracks/:playlist_id', playlistController.searchVotingTracks)
   .delete('/playlists/delete', playlistController.deleteHDJPlaylist)
   .get('/playlists/tracks/unvoted/:playlist_id', playlistController.getUnvotedHDJTracks)
   .get('/playlists/track/unvoted/:playlist_id', playlistController.getNextUnvotedHDJTrack)

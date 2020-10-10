@@ -654,4 +654,72 @@ module.exports = {
       res.status(400).json({ error: 'Error getting unvoted tracks' });
     }
   },
+  async searchVotingTracks(req, res, nex) {
+    console.log('SEARCH TRACKS');
+    const { query } = req.query;
+    if (query && query !== '') {
+      console.log(query);
+      try {
+        const { playlist_id } = req.params;
+        var tracks = await HDJTracks.findAll({
+          where: {
+            playlist_id: playlist_id,
+            was_played: false,
+            [Op.or]: [
+              {
+                track_name: Sequelize.where(
+                  Sequelize.fn('LOWER', Sequelize.col('track_name')),
+                  'LIKE',
+                  '%' + query.toLowerCase() + '%'
+                ),
+              },
+              {
+                artist_name: Sequelize.where(
+                  Sequelize.fn('LOWER', Sequelize.col('artist_name')),
+                  'LIKE',
+                  '%' + query.toLowerCase() + '%'
+                ),
+              },
+            ],
+          },
+          raw: true,
+          order: [['score', 'DESC']],
+        });
+        console.log(tracks.length);
+        res.status(200).json(tracks);
+      } catch (error) {
+        console.log(error);
+        res.status(400).json({ error: 'Error getting tracks' });
+      }
+    } else {
+      console.log('Sem query');
+      try {
+        const { playlist_id } = req.params;
+        var tracks = await HDJTracks.findAll({
+          where: { playlist_id: playlist_id, was_played: false },
+          raw: true,
+          order: [['score', 'DESC']],
+        });
+        if (!tracks || tracks.length <= 0) {
+          tracks = await HDJTracks.findAll({
+            where: { playlist_id: playlist_id },
+            raw: true,
+            order: [['score', 'DESC']],
+          });
+          await HDJTracks.update(
+            { was_played: false },
+            {
+              where: { playlist_id: playlist_id, was_played: true },
+              raw: true,
+              order: [['score', 'DESC']],
+            }
+          );
+        }
+        res.status(200).json(tracks);
+      } catch (error) {
+        console.log(error);
+        res.status(400).json({ error: 'Error getting tracks' });
+      }
+    }
+  },
 };
