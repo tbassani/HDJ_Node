@@ -616,4 +616,42 @@ module.exports = {
       res.status(400).json({ error: 'Error updating playlist' });
     }
   },
+
+  async getIfTrackVoted(req, res, next) {
+    try {
+      console.log('CHECK TRACK');
+      const { playlist_id, track_id } = req.query;
+      var userHistory = await UserHistory.findAll({
+        attributes: ['hdj_track_id'],
+        where: {
+          user_id: req.user_id,
+          hdj_playlist_id: playlist_id,
+          hdj_track_id: track_id,
+        },
+        raw: true,
+      });
+
+      var array = [];
+      var tracks = {};
+      var i = 0;
+      if (userHistory && userHistory.length > 0) {
+        userHistory.forEach((track) => {
+          array[i++] = track.hdj_track_id;
+        });
+      }
+      if (array.length === 0) {
+        tracks = await HDJTracks.findAll({
+          where: {
+            playlist_id: playlist_id,
+            id: track_id,
+          },
+          raw: true,
+        });
+      }
+      res.status(200).json(tracks);
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ error: 'Error getting unvoted tracks' });
+    }
+  },
 };

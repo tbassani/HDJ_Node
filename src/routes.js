@@ -42,6 +42,7 @@ appRoutes
   .get('/playlists/tracks/unvoted/:playlist_id', playlistController.getUnvotedHDJTracks)
   .get('/playlists/track/unvoted/:playlist_id', playlistController.getNextUnvotedHDJTrack)
   .get('/playlists/track/unplayed/:playlist_id', playlistController.getNextUnplayedHDJTrack)
+  .get('/playlists/track/if_voted', playlistController.getIfTrackVoted)
   .post('/playlists/group/add', playlistController.addToHDJGroups)
   .post('/playlists/reset', playlistController.resetHDJPlaylist);
 module.exports = appRoutes;
