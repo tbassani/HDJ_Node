@@ -488,7 +488,7 @@ module.exports = {
     } else {
       console.log('Sem query');
       try {
-        const token = await spotifyUtils.getAccessToken(req.user_id);
+        /*const token = await spotifyUtils.getAccessToken(req.user_id);
         console.log(token);
         const headers = {
           Authorization: 'Bearer ' + token,
@@ -523,7 +523,18 @@ module.exports = {
           })
           .catch((error) => {
             console.log(error.response.status);
-          });
+          });*/
+          var ret = [
+            {
+              title: 'Músicas',
+              data: [],
+            },
+            {
+              title: 'Playlists',
+              data: [],
+            },
+          ];
+          res.status(200).json(ret);
       } catch (error) {
         console.log(error);
         res.status(400).json({ error: 'Error forming authorization URL' });
