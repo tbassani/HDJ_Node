@@ -149,4 +149,29 @@ module.exports = {
       return 'ERROR';
     }
   },
+  async getArtist(artist_id, access_token) {
+    try {
+      var resp;
+      console.log('GET Artist');
+      const headers = {
+        Authorization: 'Bearer ' + access_token,
+      };
+      await axios({
+        method: 'GET',
+        url: `https://api.spotify.com/v1/artists/${artist_id}`,
+        headers: headers,
+      })
+        .then((response) => {
+          data = response.data;
+          resp = data;
+        })
+        .catch((error) => {
+          console.log('ERROR');
+          console.log(error);
+        });
+      return resp;
+    } catch (error) {
+      return 'ERROR';
+    }
+  },
 };
