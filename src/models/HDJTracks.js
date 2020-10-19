@@ -13,8 +13,8 @@ class HDJTracks extends Model {
         duration: DataTypes.INTEGER,
         album_name: DataTypes.STRING,
         album_art: DataTypes.STRING,
-        genre: DataTypes.STRING,
         artist_name: DataTypes.STRING,
+        genre: DataTypes.STRING,
         deleted_at: DataTypes.DATE,
       },
       {

@@ -91,6 +91,8 @@ module.exports = {
         console.log('TRACK id:' + track.id);
         var spotifyRawTrack = await spotifyUtils.getTrack(track.id, token);
         var spotifyRawArtist = await spotifyUtils.getArtist(spotifyRawTrack.artists[0].id, token);
+        console.log("GENRE");
+        console.log(spotifyRawArtist.genres.join(', '));
         await HDJTracks.create({
           user_id: req.user_id,
           playlist_id: hdjPlaylist.dataValues.id,
@@ -115,7 +117,9 @@ module.exports = {
         for (const key in tracks) {
           if (tracks.hasOwnProperty(key)) {
             const element = tracks[key];
-            //console.log(element);
+            console.log("ARTISTIS FROM PLALIST");
+            var spotifyRawArtist = await spotifyUtils.getArtist(element.track.artists[0].id, token);
+            
             await HDJTracks.create({
               user_id: req.user_id,
               playlist_id: hdjPlaylist.dataValues.id,
@@ -130,6 +134,7 @@ module.exports = {
               artist_name: element.track.artists[1]
                 ? element.track.artists[0].name + ', ' + element.track.artists[1].name
                 : element.track.artists[0].name,
+                genre: spotifyRawArtist.genres.join(', '),
             });
           }
         }
@@ -204,8 +209,8 @@ module.exports = {
           for (const key in tracks) {
             if (tracks.hasOwnProperty(key)) {
               const element = tracks[key];
-              console.log('KEY:' + key);
-              var spotifyRawArtist = await spotifyUtils.getArtist(tracks.artists[0].id, token);
+              console.log(element);
+              var spotifyRawArtist = await spotifyUtils.getArtist(element.artists[0].id, token);
               const [hdjtrack, created] = await HDJTracks.findOrCreate({
                 where: {
                   playlist_id: hdj_playlist_id,
