@@ -167,7 +167,7 @@ module.exports = {
 
       analytics.logAction('Premium', req.user_id);
 
-      res.status(200);
+      res.status(200).json(req.user_id);
     } catch (error) {
       next(error);
     }
