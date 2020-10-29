@@ -33,7 +33,7 @@ module.exports = {
         },
       });
       var Users = profile[0];
-      if (Math.floor(Date.now() / 1000) > Users.dataValues.token_expiration) {
+      if (Math.round(Date.now() / 1000) > Users.dataValues.token_expiration) {
         //fazer chamada de refresh
         const headers = {
           headers: {
