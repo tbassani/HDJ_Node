@@ -161,4 +161,15 @@ module.exports = {
       next(error);
     }
   },
+
+  async premiumClick(req, res, next) {
+    try {
+
+      analytics.logAction('Premium', req.user_id);
+
+      res.status(200);
+    } catch (error) {
+      next(error);
+    }
+  },
 };

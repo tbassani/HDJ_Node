@@ -46,4 +46,5 @@ appRoutes
   .get('/playlists/track/if_voted', playlistController.getIfTrackVoted)
   .post('/playlists/group/add', playlistController.addToHDJGroups)
   .post('/playlists/reset', playlistController.resetHDJPlaylist);
+  .post('/premium/click', userController.premiumClick);
 module.exports = appRoutes;
