@@ -34,7 +34,7 @@ module.exports = {
       });
       var Users = profile[0];
       if (Math.round(Date.now() / 1000) > Users.dataValues.token_expiration) {
-        //fazer chamada de refresh
+        console.log("Chamda de Refresh");
         const headers = {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',

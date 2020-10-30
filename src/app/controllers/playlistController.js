@@ -206,11 +206,15 @@ module.exports = {
           console.log('PLAYLIST id:' + playlist.id);
           var spotifyRawTracks = await spotifyUtils.getPlaylistTrack(playlist.id, token);
           var tracks = spotifyRawTracks.tracks.items;
+          console.log("HAS TRACKS");
+          console.log(tracks);
           for (const key in tracks) {
+            
             if (tracks.hasOwnProperty(key)) {
               const element = tracks[key];
               console.log(element);
-              var spotifyRawArtist = await spotifyUtils.getArtist(element.artists[0].id, token);
+              console.log(element);
+              var spotifyRawArtist = await spotifyUtils.getArtist(element.artists? element.artists[0].id : '', token);
               const [hdjtrack, created] = await HDJTracks.findOrCreate({
                 where: {
                   playlist_id: hdj_playlist_id,
@@ -230,7 +234,7 @@ module.exports = {
                   artist_name: element.track.artists[1]
                     ? element.track.artists[0].name + ', ' + element.track.artists[1].name
                     : element.track.artists[0].name,
-                    genre: spotifyRawArtist.genres.join(', '),
+                    genre: spotifyRawArtist? spotifyRawArtist.genres.join(', ') : '',
                 },
               });
               if (!created) {

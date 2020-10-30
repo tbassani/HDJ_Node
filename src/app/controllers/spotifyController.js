@@ -150,6 +150,7 @@ module.exports = {
           data: body,
         })
           .then((response) => {
+            console.log("Success playing track");
             res.status(200).json({ success: `Playing Track ${track[0].track_name}` });
 
             HDJTracks.update(
