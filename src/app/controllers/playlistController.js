@@ -475,7 +475,7 @@ module.exports = {
           array[i++] = track.hdj_track_id;
         });
       }
-      console.log(req.body);
+      console.log(array);
       var tracks = await HDJTracks.findAll({
         where: {
           playlist_id: playlist_id,
@@ -485,15 +485,18 @@ module.exports = {
         raw: true,
         order: [[Sequelize.fn('RANDOM')]],
       });
+      console.log(tracks.length);
       if (!tracks || tracks.length <= 0) {
         console.log('Fim das músicas');
         tracks = await HDJTracks.findAll({
           where: {
             playlist_id: playlist_id,
+            was_played: false,
           },
           raw: true,
           order: [[Sequelize.fn('RANDOM')]],
         });
+        console.log(tracks.length);
         await UserHistory.destroy({
           where: {
             user_id: req.user_id,
