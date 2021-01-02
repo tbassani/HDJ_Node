@@ -650,7 +650,7 @@ module.exports = {
       });
 
       var array = [];
-      var tracks = {};
+      var tracks;
       var i = 0;
       if (userHistory && userHistory.length > 0) {
         userHistory.forEach((track) => {
