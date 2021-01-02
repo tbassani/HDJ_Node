@@ -279,6 +279,7 @@ module.exports = {
         });
         const [userHistory, created] = await UserHistory.findOrCreate({
           where: {
+            user_id: req.user_id,
             hdj_playlist_id: playlist_id,
             hdj_track_id: track_id,
           },
@@ -323,6 +324,7 @@ module.exports = {
         });
         const [userHistory, created] = await UserHistory.findOrCreate({
           where: {
+            user_id: req.user_id,
             hdj_playlist_id: playlist_id,
             hdj_track_id: track_id,
           },
