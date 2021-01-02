@@ -504,7 +504,7 @@ module.exports = {
           },
         });
       }
-      res.status(200).json(tracks[Math.floor(Math.random() * items.length)]);
+      res.status(200).json(tracks[0]);
     } catch (error) {
       console.log(error);
       res.status(400).json({ error: 'Error getting unvoted tracks' });
