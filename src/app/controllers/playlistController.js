@@ -649,7 +649,7 @@ module.exports = {
         raw: true,
       });
       var tracks;
-      if (userHistory[0].hdj_playlist_id && userHistory.length > 0) {
+      if (userHistory[0] && userHistory.length > 0) {
         res.status(200).json("");
       } else {
         tracks = await HDJTracks.findAll({
