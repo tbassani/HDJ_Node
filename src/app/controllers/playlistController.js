@@ -638,7 +638,7 @@ module.exports = {
   async getIfTrackVoted(req, res, next) {
     try {
       console.log('CHECK TRACK');
-      const { playlist_id, track_id } = req.query;
+      const { track_id, playlist_id } = req.query;
       var userHistory = await UserHistory.findAll({
         attributes: ['hdj_track_id'],
         where: {
@@ -648,16 +648,10 @@ module.exports = {
         },
         raw: true,
       });
-
-      var array = [];
       var tracks;
-      var i = 0;
       if (userHistory && userHistory.length > 0) {
-        userHistory.forEach((track) => {
-          array[i++] = track.hdj_track_id;
-        });
-      }
-      if (array.length === 0) {
+        res.status(200).json(tracks);
+      } else {
         tracks = await HDJTracks.findAll({
           where: {
             playlist_id: playlist_id,
