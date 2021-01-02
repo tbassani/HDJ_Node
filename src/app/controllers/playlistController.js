@@ -650,7 +650,7 @@ module.exports = {
       });
       var tracks;
       if (userHistory && userHistory.length > 0) {
-        res.status(200).json(tracks);
+        res.status(200).json("");
       } else {
         tracks = await HDJTracks.findAll({
           where: {
