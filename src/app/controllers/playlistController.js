@@ -659,8 +659,8 @@ module.exports = {
           },
           raw: true,
         });
+        res.status(200).json(tracks);
       }
-      res.status(200).json(tracks);
     } catch (error) {
       console.log(error);
       res.status(400).json({ error: 'Error getting unvoted tracks' });
