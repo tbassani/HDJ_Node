@@ -27,13 +27,15 @@ module.exports = {
     try {
       const transport = nodeMailer.createTransport({
         service,
+        port: 465,
+        secure: true, // use SSL
         auth: {
           user,
           pass,
         },
       });
       var mailOptions = {
-        from: 'hangthedj.jukebox@gmail.com',
+        from: 'validacao.email@hangthedj.com.br',
         to: email,
         subject: 'Hang the DJ',
         text: 'Seu código de confirmação é: ' + val,
@@ -57,7 +59,6 @@ module.exports = {
   async forgotPassword(req, res, next) {
     var randomPwd = randomString(6, process.env.RESET_KEY);
     const { email } = req.body;
-    console.log(email);
     try {
       const find_user = await Users.findAll({
         where: {
@@ -78,15 +79,20 @@ module.exports = {
             },
           }
         );
-        const transport = nodeMailer.createTransport({
-          service,
+        console.log(service);
+        const smtpConfig = {
+          host: service,
+          port: 465,
+          secure: true, // use SSL
           auth: {
             user,
             pass,
           },
-        });
+        };
+
+        const transport = nodeMailer.createTransport(smtpConfig);
         var mailOptions = {
-          from: 'hangthedj.jukebox@gmail.com',
+          from: 'validacao.email@hangthedj.com.br',
           to: email,
           subject: 'Hang the DJ',
           text: 'Sua nova senha é: ' + randomPwd,
