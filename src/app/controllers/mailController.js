@@ -18,7 +18,8 @@ module.exports = {
     const val = Math.floor(1000 + Math.random() * 9000);
     const { email } = req.body;
     console.log(email);
-
+    console.log(user);
+    console.log(pass);
     const confirmation = await ConfirmEmail.create({
       email: email,
       code: val,
@@ -26,7 +27,7 @@ module.exports = {
     });
     try {
       const transport = nodeMailer.createTransport({
-        service,
+        host: service,
         port: 465,
         secure: true, // use SSL
         auth: {
@@ -43,6 +44,7 @@ module.exports = {
 
       transport.sendMail(mailOptions, function (error, info) {
         if (error) {
+          console.log('ERROR');
           console.log(error);
           return res.status(500);
         } else {
