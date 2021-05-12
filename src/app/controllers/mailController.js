@@ -1,5 +1,6 @@
 const path = require('path');
 const nodeMailer = require('nodemailer');
+const bcrypt = require('bcrypt');
 
 const ConfirmEmail = require('../../models/ConfirmEmail');
 const Users = require('../../models/User');
@@ -72,8 +73,9 @@ module.exports = {
       const check_user = find_user[0];
 
       if (check_user && check_user !== undefined && find_user.length > 0) {
+        const hash = bcrypt.hashSync(randomPwd, 10);
         await Users.update(
-          { password: randomPwd },
+          { password: hash },
           {
             where: {
               email,
