@@ -141,7 +141,8 @@ module.exports = {
       if (!login_user || login_user === undefined || user.length === 0) {
         return res.status(400).json({ error: 'Usuário não encontrado' });
       }
-      if (old_password === login_user.password) {
+      const encryptedOldPwd = bcrypt.hashSync(old_password, 10);
+      if (encryptedOldPwd === login_user.password) {
         console.log('Update Password');
         const hash = bcrypt.hashSync(new_password, 10);
         await Users.update(
@@ -164,7 +165,6 @@ module.exports = {
 
   async premiumClick(req, res, next) {
     try {
-
       analytics.logAction('Premium', req.user_id);
 
       res.status(200).json(req.user_id);
