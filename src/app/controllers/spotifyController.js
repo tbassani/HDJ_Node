@@ -468,7 +468,6 @@ module.exports = {
               type: 'playlist',
               selectedClass: null,
               isSelected: false,
-              duration: duration,
             });
           });
         }
