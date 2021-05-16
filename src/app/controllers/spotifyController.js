@@ -474,11 +474,10 @@ module.exports = {
                     isSelected: false,
                     duration: duration,
                   });
-                  console.log('PLAYLIST ARRAY');
-                  console.log(playlists);
                 });
               });
             }
+            console.log('FIM-------------------------------------------');
             ret = [
               {
                 title: 'Músicas',
@@ -489,6 +488,7 @@ module.exports = {
                 data: playlists,
               },
             ];
+            console.log(ret);
             res.status(200).json(ret);
           })
           .catch((error) => {
