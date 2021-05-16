@@ -150,7 +150,7 @@ module.exports = {
           data: body,
         })
           .then((response) => {
-            console.log("Success playing track");
+            console.log('Success playing track');
             res.status(200).json({ success: `Playing Track ${track[0].track_name}` });
 
             HDJTracks.update(
@@ -455,6 +455,14 @@ module.exports = {
 
             if (response.data.playlists.items) {
               response.data.playlists.items.forEach((element) => {
+                var spotifyRawTracks = await spotifyUtils.getPlaylistTrack(element.id, token);
+                var playlistTracks = spotifyRawTracks.tracks.items;
+                let duration = 0;
+                for (const key in playlistTracks) {
+                  if (playlistTracks.hasOwnProperty(key)) {
+                    duration = duration + playlistTracks[key].track.duration_ms;
+                  }
+                }
                 playlists.push({
                   playlist_name: element.name,
                   playlist_art: element.images[0] ? element.images[0].url : '',
@@ -463,6 +471,7 @@ module.exports = {
                   type: 'playlist',
                   selectedClass: null,
                   isSelected: false,
+                  duration: duration,
                 });
               });
             }
@@ -525,17 +534,17 @@ module.exports = {
           .catch((error) => {
             console.log(error.response.status);
           });*/
-          var ret = [
-            {
-              title: 'Músicas',
-              data: [],
-            },
-            {
-              title: 'Playlists',
-              data: [],
-            },
-          ];
-          res.status(200).json(ret);
+        var ret = [
+          {
+            title: 'Músicas',
+            data: [],
+          },
+          {
+            title: 'Playlists',
+            data: [],
+          },
+        ];
+        res.status(200).json(ret);
       } catch (error) {
         console.log(error);
         res.status(400).json({ error: 'Error forming authorization URL' });
