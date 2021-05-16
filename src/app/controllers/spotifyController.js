@@ -463,16 +463,16 @@ module.exports = {
                       duration = duration + playlistTracks[key].track.duration_ms;
                     }
                   }
-                  playlists.push({
-                    playlist_name: element.name,
-                    playlist_art: element.images[0] ? element.images[0].url : '',
-                    external_playlist_id: element.id,
-                    tracks: element.tracks.href,
-                    type: 'playlist',
-                    selectedClass: null,
-                    isSelected: false,
-                    duration: duration,
-                  });
+                });
+                playlists.push({
+                  playlist_name: element.name,
+                  playlist_art: element.images[0] ? element.images[0].url : '',
+                  external_playlist_id: element.id,
+                  tracks: element.tracks.href,
+                  type: 'playlist',
+                  selectedClass: null,
+                  isSelected: false,
+                  duration: duration,
                 });
               });
             }
