@@ -457,7 +457,6 @@ module.exports = {
               response.data.playlists.items.forEach((element) => {
                 spotifyUtils.getPlaylistTrack(element.id, token).then((spotifyRawTracks) => {
                   console.log('PLAYLIST NAME: ' + element.name);
-                  console.log(spotifyRawTracks);
                   var playlistTracks = spotifyRawTracks.tracks.items;
                   let duration = 0;
                   for (const key in playlistTracks) {
@@ -475,6 +474,8 @@ module.exports = {
                     isSelected: false,
                     duration: duration,
                   });
+                  console.log('PLAYLIST ARRAY');
+                  console.log(playlists);
                 });
               });
             }
