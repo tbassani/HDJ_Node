@@ -450,16 +450,19 @@ module.exports = {
 
         if (response.data.playlists.items) {
           response.data.playlists.items.forEach((element) => {
-            // spotifyUtils.getPlaylistTrack(element.id, token).then((spotifyRawTracks) => {
-            //   console.log('PLAYLIST NAME: ' + element.name);
-            //   var playlistTracks = spotifyRawTracks.tracks.items;
-            //   let duration = 0;
-            //   for (const key in playlistTracks) {
-            //     if (playlistTracks.hasOwnProperty(key)) {
-            //       duration = duration + playlistTracks[key].track.duration_ms;
-            //     }
-            //   }
-            // });
+            const promises = spotifyUtils
+              .getPlaylistTrack(element.id, token)
+              .then((spotifyRawTracks) => {
+                console.log('PLAYLIST NAME: ' + element.name);
+                var playlistTracks = spotifyRawTracks.tracks.items;
+                let duration = 0;
+                for (const key in playlistTracks) {
+                  if (playlistTracks.hasOwnProperty(key)) {
+                    duration = duration + playlistTracks[key].track.duration_ms;
+                  }
+                }
+              });
+            await Promise.all(promises);
             playlists.push({
               playlist_name: element.name,
               playlist_art: element.images[0] ? element.images[0].url : '',
@@ -468,6 +471,7 @@ module.exports = {
               type: 'playlist',
               selectedClass: null,
               isSelected: false,
+              duration: duration,
             });
           });
         }
