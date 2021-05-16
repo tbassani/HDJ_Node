@@ -455,41 +455,47 @@ module.exports = {
 
             if (response.data.playlists.items) {
               response.data.playlists.items.forEach((element) => {
-                spotifyUtils.getPlaylistTrack(element.id, token).then((spotifyRawTracks) => {
-                  console.log('PLAYLIST NAME: ' + element.name);
-                  var playlistTracks = spotifyRawTracks.tracks.items;
-                  let duration = 0;
-                  for (const key in playlistTracks) {
-                    if (playlistTracks.hasOwnProperty(key)) {
-                      duration = duration + playlistTracks[key].track.duration_ms;
+                spotifyUtils
+                  .getPlaylistTrack(element.id, token)
+                  .then((spotifyRawTracks) => {
+                    console.log('PLAYLIST NAME: ' + element.name);
+                    var playlistTracks = spotifyRawTracks.tracks.items;
+                    let duration = 0;
+                    for (const key in playlistTracks) {
+                      if (playlistTracks.hasOwnProperty(key)) {
+                        duration = duration + playlistTracks[key].track.duration_ms;
+                      }
                     }
-                  }
-                  playlists.push({
-                    playlist_name: element.name,
-                    playlist_art: element.images[0] ? element.images[0].url : '',
-                    external_playlist_id: element.id,
-                    tracks: element.tracks.href,
-                    type: 'playlist',
-                    selectedClass: null,
-                    isSelected: false,
-                    duration: duration,
+                  })
+                  .finally(() => {
+                    playlists.push({
+                      playlist_name: element.name,
+                      playlist_art: element.images[0] ? element.images[0].url : '',
+                      external_playlist_id: element.id,
+                      tracks: element.tracks.href,
+                      type: 'playlist',
+                      selectedClass: null,
+                      isSelected: false,
+                      duration: duration,
+                    });
+                  })
+                  .then(() => {
+                    console.log('FIM-------------------------------------------');
+                    ret = [
+                      {
+                        title: 'Músicas',
+                        data: tracks,
+                      },
+                      {
+                        title: 'Playlists',
+                        data: playlists,
+                      },
+                    ];
+                    console.log(ret);
+                    res.status(200).json(ret);
                   });
-                });
               });
             }
-            console.log('FIM-------------------------------------------');
-            ret = [
-              {
-                title: 'Músicas',
-                data: tracks,
-              },
-              {
-                title: 'Playlists',
-                data: playlists,
-              },
-            ];
-            console.log(ret);
-            res.status(200).json(ret);
           })
           .catch((error) => {
             console.log(error);
