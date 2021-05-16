@@ -450,19 +450,15 @@ module.exports = {
 
         if (response.data.playlists.items) {
           const mainPromise = response.data.playlists.items.forEach(async (element) => {
-            const promises = spotifyUtils
-              .getPlaylistTrack(element.id, token)
-              .then((spotifyRawTracks) => {
-                console.log('PLAYLIST NAME: ' + element.name);
-                var playlistTracks = spotifyRawTracks.tracks.items;
-                let duration = 0;
-                for (const key in playlistTracks) {
-                  if (playlistTracks.hasOwnProperty(key)) {
-                    duration = duration + playlistTracks[key].track.duration_ms;
-                  }
-                }
-              });
-            await Promise.all(promises);
+            let duration = 0;
+            const spotifyRawTracks = await spotifyUtils.getPlaylistTrack(element.id, token);
+            console.log('PLAYLIST NAME: ' + element.name);
+            var playlistTracks = spotifyRawTracks.tracks.items;
+            for (const key in playlistTracks) {
+              if (playlistTracks.hasOwnProperty(key)) {
+                duration = duration + playlistTracks[key].track.duration_ms;
+              }
+            }
             playlists.push({
               playlist_name: element.name,
               playlist_art: element.images[0] ? element.images[0].url : '',
