@@ -451,13 +451,6 @@ module.exports = {
         if (response.data.playlists.items) {
           let duration = 0;
           for (const element of response.data.playlists.items) {
-            const spotifyRawTracks = await spotifyUtils.getPlaylistTrack(element.id, token);
-            var playlistTracks = spotifyRawTracks.tracks.items;
-            for (const key in playlistTracks) {
-              if (playlistTracks.hasOwnProperty(key)) {
-                duration = duration + playlistTracks[key].track.duration_ms;
-              }
-            }
             playlists.push({
               playlist_name: element.name,
               playlist_art: element.images[0] ? element.images[0].url : '',
@@ -466,7 +459,6 @@ module.exports = {
               type: 'playlist',
               selectedClass: null,
               isSelected: false,
-              duration: duration,
             });
             duration = 0;
           }
