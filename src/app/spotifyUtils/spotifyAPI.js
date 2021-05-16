@@ -34,7 +34,7 @@ module.exports = {
       });
       var Users = profile[0];
       if (Math.round(Date.now() / 1000) > Users.dataValues.token_expiration) {
-        console.log("Chamda de Refresh");
+        console.log('Chamda de Refresh');
         const headers = {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -101,7 +101,6 @@ module.exports = {
   async getPlaylistTrack(playlist_id, access_token) {
     try {
       var resp;
-      console.log('GET TRACKS');
       const headers = {
         Authorization: 'Bearer ' + access_token,
       };

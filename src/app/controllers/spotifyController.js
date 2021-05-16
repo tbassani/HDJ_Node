@@ -453,13 +453,10 @@ module.exports = {
           const mainPromise = response.data.playlists.items.forEach(async (element) => {
             const spotifyRawTracks = await spotifyUtils.getPlaylistTrack(element.id, token);
             console.log('PLAYLIST NAME: ' + element.name);
-            console.log('RAW TRACKS');
-            console.log(spotifyRawTracks);
             var playlistTracks = spotifyRawTracks.tracks.items;
             for (const key in playlistTracks) {
               if (playlistTracks.hasOwnProperty(key)) {
                 duration = duration + playlistTracks[key].track.duration_ms;
-                console.log('duration', duration);
               }
             }
             playlists.push({
@@ -473,6 +470,8 @@ module.exports = {
               duration: duration,
             });
             duration = 0;
+            console.log('PLAYLISTS-----------------------------------------');
+            console.log(playlists);
           });
           await Promise.all(mainPromise);
         }
