@@ -413,19 +413,16 @@ module.exports = {
   async searchPlaylistsAndTracks(req, res, nex) {
     const { query } = req.query;
     if (query && query !== '') {
-      console.log(query);
       var ret = {};
       const q = query;
       var tracks = [];
       var playlists = [];
       try {
         const token = await spotifyUtils.getAccessToken(req.user_id);
-        console.log(token);
         const headers = {
           Authorization: 'Bearer ' + token,
         };
-        var display_name;
-        await axios({
+        const response = await axios({
           method: 'GET',
           url: 'https://api.spotify.com/v1/search',
           headers: headers,
@@ -433,74 +430,61 @@ module.exports = {
             q,
             type: 'playlist,track',
           },
-        })
-          .then((response) => {
-            console.log(response.data.playlists);
-            if (response.data.tracks.items) {
-              response.data.tracks.items.forEach((element) => {
-                tracks.push({
-                  artists: element.artists[1]
-                    ? element.artists[0].name + ', ' + element.artists[1].name
-                    : element.artists[0].name,
-                  duration: element.duration_ms,
-                  track_name: element.name,
-                  album_art: element.album.images[0].url,
-                  external_track_id: element.id,
-                  type: 'track',
-                  selectedClass: null,
-                  isSelected: false,
-                });
-              });
-            }
-
-            if (response.data.playlists.items) {
-              response.data.playlists.items.forEach((element) => {
-                spotifyUtils
-                  .getPlaylistTrack(element.id, token)
-                  .then((spotifyRawTracks) => {
-                    console.log('PLAYLIST NAME: ' + element.name);
-                    var playlistTracks = spotifyRawTracks.tracks.items;
-                    let duration = 0;
-                    for (const key in playlistTracks) {
-                      if (playlistTracks.hasOwnProperty(key)) {
-                        duration = duration + playlistTracks[key].track.duration_ms;
-                      }
-                    }
-                  })
-                  .finally(() => {
-                    playlists.push({
-                      playlist_name: element.name,
-                      playlist_art: element.images[0] ? element.images[0].url : '',
-                      external_playlist_id: element.id,
-                      tracks: element.tracks.href,
-                      type: 'playlist',
-                      selectedClass: null,
-                      isSelected: false,
-                      duration: duration,
-                    });
-                  })
-                  .then(() => {
-                    console.log('FIM-------------------------------------------');
-                    ret = [
-                      {
-                        title: 'Músicas',
-                        data: tracks,
-                      },
-                      {
-                        title: 'Playlists',
-                        data: playlists,
-                      },
-                    ];
-                    console.log(ret);
-                    res.status(200).json(ret);
-                  });
-              });
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-            res.status(400).json({ error: 'Error on Search' });
+        });
+        if (response.data.tracks.items) {
+          response.data.tracks.items.forEach((element) => {
+            tracks.push({
+              artists: element.artists[1]
+                ? element.artists[0].name + ', ' + element.artists[1].name
+                : element.artists[0].name,
+              duration: element.duration_ms,
+              track_name: element.name,
+              album_art: element.album.images[0].url,
+              external_track_id: element.id,
+              type: 'track',
+              selectedClass: null,
+              isSelected: false,
+            });
           });
+        }
+
+        if (response.data.playlists.items) {
+          response.data.playlists.items.forEach((element) => {
+            // spotifyUtils.getPlaylistTrack(element.id, token).then((spotifyRawTracks) => {
+            //   console.log('PLAYLIST NAME: ' + element.name);
+            //   var playlistTracks = spotifyRawTracks.tracks.items;
+            //   let duration = 0;
+            //   for (const key in playlistTracks) {
+            //     if (playlistTracks.hasOwnProperty(key)) {
+            //       duration = duration + playlistTracks[key].track.duration_ms;
+            //     }
+            //   }
+            // });
+            playlists.push({
+              playlist_name: element.name,
+              playlist_art: element.images[0] ? element.images[0].url : '',
+              external_playlist_id: element.id,
+              tracks: element.tracks.href,
+              type: 'playlist',
+              selectedClass: null,
+              isSelected: false,
+              duration: duration,
+            });
+          });
+        }
+        console.log('FIM-------------------------------------------');
+        ret = [
+          {
+            title: 'Músicas',
+            data: tracks,
+          },
+          {
+            title: 'Playlists',
+            data: playlists,
+          },
+        ];
+        console.log(ret);
+        res.status(200).json(ret);
       } catch (error) {
         console.log(error);
         res.status(400).json({ error: 'Error on Search' });
