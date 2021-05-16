@@ -450,7 +450,7 @@ module.exports = {
 
         if (response.data.playlists.items) {
           let duration = 0;
-          const mainPromise = response.data.playlists.items.forEach(async (element) => {
+          for (const element of response.data.playlists.items) {
             const spotifyRawTracks = await spotifyUtils.getPlaylistTrack(element.id, token);
             var playlistTracks = spotifyRawTracks.tracks.items;
             for (const key in playlistTracks) {
@@ -469,8 +469,7 @@ module.exports = {
               duration: duration,
             });
             duration = 0;
-          });
-          await Promise.all(mainPromise);
+          }
         }
         console.log('FIM-------------------------------------------');
         ret = [
