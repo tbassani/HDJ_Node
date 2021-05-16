@@ -471,20 +471,20 @@ module.exports = {
             });
           });
           await Promise.all(mainPromise);
-          console.log('FIM-------------------------------------------');
-          ret = [
-            {
-              title: 'Músicas',
-              data: tracks,
-            },
-            {
-              title: 'Playlists',
-              data: playlists,
-            },
-          ];
-          console.log(ret);
-          res.status(200).json(ret);
         }
+        console.log('FIM-------------------------------------------');
+        ret = [
+          {
+            title: 'Músicas',
+            data: tracks,
+          },
+          {
+            title: 'Playlists',
+            data: playlists,
+          },
+        ];
+        console.log(ret);
+        res.status(200).json(ret);
       } catch (error) {
         console.log(error);
         res.status(400).json({ error: 'Error on Search' });
