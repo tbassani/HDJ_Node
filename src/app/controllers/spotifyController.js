@@ -290,7 +290,7 @@ module.exports = {
     try {
       //Inicialização de variáveis
       console.log('ADD TRACKS TO QUEUE');
-      const { track_id } = req.body;
+      const { tracks } = req.body;
       const token = await spotifyUtils.getAccessToken(req.user_id);
       console.log(token);
       var i = 0;
@@ -298,90 +298,90 @@ module.exports = {
       const headers = {
         Authorization: 'Bearer ' + token,
       };
-      var duration = 0;
-      var queue = [];
-      if (!track_id) {
-        var tracks = await HDJTracks.findAll({
-          where: {
-            playlist_id: playlist_id,
-            was_played: false,
-          },
-          raw: true,
-          order: [['score', 'DESC']],
-        });
-        tracks.forEach((element) => {
-          duration = duration + element.duration;
-          if (duration < 1200000) {
-            queue.push(element);
-          }
-        });
-        if (duration < 1200000) {
-          var old_tracks = await HDJTracks.findAll({
-            where: {
-              playlist_id: playlist_id,
-            },
-            raw: true,
-            order: [['score', 'DESC']],
-          });
-          old_tracks.forEach((old_element) => {
-            if (duration < 1200000) {
-              queue.push(old_element);
-              duration = duration + old_element.duration;
-            }
-          });
-          if (!tracks || tracks.length <= 0) {
-            await HDJTracks.update(
-              { was_played: false },
-              {
-                where: {
-                  playlist_id: playlist_id,
-                  was_played: true,
-                },
-                raw: true,
-              }
-            );
-            await UserHistory.destroy({
-              where: {
-                user_id: req.user_id,
-                hdj_playlist_id: playlist_id,
-              },
-            });
-          }
-        }
-        queue.forEach((element) => {
-          var uri_data = {
-            uri: `spotify:track:${element.external_track_id}`,
-          };
-          console.log('Adding track: ' + element.track_name);
-          duration = duration + element.duration;
-          axios({
-            method: 'POST',
-            url: 'https://api.spotify.com/v1/me/player/queue',
-            headers: headers,
-            params: uri_data,
-          })
-            .then((response) => {})
-            .catch((error) => {
-              console.log(error);
-              res.status(400).json({ error: 'Error adding Track' });
-            });
-        });
-        var ids = [];
-        queue.forEach((element) => {
-          ids.push(element.id);
-        });
-        await HDJTracks.update(
-          { was_played: true },
-          {
-            where: {
-              id: ids,
-            },
-          }
-        );
-        res.status(200).json({ success: 'tracks added' });
-      } else {
+      // if (!track_id) {
+      //   var tracks = await HDJTracks.findAll({
+      //     where: {
+      //       playlist_id: playlist_id,
+      //       was_played: false,
+      //     },
+      //     raw: true,
+      //     order: [['score', 'DESC']],
+      //   });
+      //   tracks.forEach((element) => {
+      //     duration = duration + element.duration;
+      //     if (duration < 1200000) {
+      //       queue.push(element);
+      //     }
+      //   });
+      //   if (duration < 1200000) {
+      //     var old_tracks = await HDJTracks.findAll({
+      //       where: {
+      //         playlist_id: playlist_id,
+      //       },
+      //       raw: true,
+      //       order: [['score', 'DESC']],
+      //     });
+      //     old_tracks.forEach((old_element) => {
+      //       if (duration < 1200000) {
+      //         queue.push(old_element);
+      //         duration = duration + old_element.duration;
+      //       }
+      //     });
+      //     if (!tracks || tracks.length <= 0) {
+      //       await HDJTracks.update(
+      //         { was_played: false },
+      //         {
+      //           where: {
+      //             playlist_id: playlist_id,
+      //             was_played: true,
+      //           },
+      //           raw: true,
+      //         }
+      //       );
+      //       await UserHistory.destroy({
+      //         where: {
+      //           user_id: req.user_id,
+      //           hdj_playlist_id: playlist_id,
+      //         },
+      //       });
+      //     }
+      //   }
+      //   queue.forEach((element) => {
+      //     var uri_data = {
+      //       uri: `spotify:track:${element.external_track_id}`,
+      //     };
+      //     console.log('Adding track: ' + element.track_name);
+      //     duration = duration + element.duration;
+      //     axios({
+      //       method: 'POST',
+      //       url: 'https://api.spotify.com/v1/me/player/queue',
+      //       headers: headers,
+      //       params: uri_data,
+      //     })
+      //       .then((response) => {})
+      //       .catch((error) => {
+      //         console.log(error);
+      //         res.status(400).json({ error: 'Error adding Track' });
+      //       });
+      //   });
+      //   var ids = [];
+      //   queue.forEach((element) => {
+      //     ids.push(element.id);
+      //   });
+      //   await HDJTracks.update(
+      //     { was_played: true },
+      //     {
+      //       where: {
+      //         id: ids,
+      //       },
+      //     }
+      //   );
+      //   res.status(200).json({ success: 'tracks added' });
+      // } else {
+
+      tracks.forEach((trackId) => {
         var uri_data = {
-          uri: `spotify:track:${track_id}`,
+          uri: `spotify:track:${trackId}`,
         };
         axios({
           method: 'POST',
@@ -398,12 +398,15 @@ module.exports = {
           { was_played: true },
           {
             where: {
-              external_track_id: track_id,
+              hdj_playlist_id: playlist_id,
+              external_track_id: trackId,
             },
           }
         );
-        res.status(200).json({ success: 'track added' });
-      }
+      });
+
+      res.status(200).json({ success: 'track added' });
+      //}
     } catch (error) {
       console.log(error);
       res.status(400).json({ error: 'Error adding Track' });
