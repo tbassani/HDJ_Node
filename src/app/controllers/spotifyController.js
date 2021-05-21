@@ -379,21 +379,16 @@ module.exports = {
       //   res.status(200).json({ success: 'tracks added' });
       // } else {
 
-      tracks.forEach((trackId) => {
+      for (const trackId of tracks) {
         var uri_data = {
           uri: `spotify:track:${trackId}`,
         };
-        axios({
+        await axios({
           method: 'POST',
           url: 'https://api.spotify.com/v1/me/player/queue',
           headers: headers,
           params: uri_data,
-        })
-          .then((response) => {})
-          .catch((error) => {
-            console.log(error);
-            res.status(400).json({ error: 'Error adding Track' });
-          });
+        });
         await HDJTracks.update(
           { was_played: true },
           {
@@ -403,7 +398,7 @@ module.exports = {
             },
           }
         );
-      });
+      }
 
       res.status(200).json({ success: 'track added' });
       //}
