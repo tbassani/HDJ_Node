@@ -29,6 +29,7 @@ appRoutes
   .post('/spotify/track/pause', spotifyController.pauseTrack)
   .get('/spotify/playback_state', spotifyController.getPlaybackState)
   .get('/spotify/search', spotifyController.searchPlaylistsAndTracks)
+  .delete('/spotify/delete_from_queue', spotifyController.removeTracksFromQueue)
   .get('/user/profile', userController.getActiveProfile)
   .post('/playlist/create', playlistController.createHDJPlaylist)
   .post('/playlist/mix', playlistController.mixHDJPlaylist)

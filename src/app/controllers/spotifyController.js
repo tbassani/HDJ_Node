@@ -14,7 +14,7 @@ function generateAuthURL(user_id) {
     spotifyConfig.clientId
   }&response_type=code&redirect_uri=${encodeURI(
     spotifyConfig.redirectUri
-  )}&scope=user-read-private%20user-read-email%20streaming%20app-remote-control%20user-read-currently-playing%20user-read-playback-state%20user-modify-playback-state&state=${user_id}&show_dialog=true`;
+  )}&scope=user-read-private%20user-read-email%20streaming%20app-remote-control%20user-library-modify%20user-read-currently-playing%20user-read-playback-state%20user-modify-playback-state&state=${user_id}&show_dialog=true`;
 }
 
 async function refreshAccessToken(user_id, refresh_token, profile_id) {
@@ -322,6 +322,49 @@ module.exports = {
             where: {
               playlist_id: playlist_id,
               external_track_id: trackId,
+            },
+          }
+        );
+      }
+
+      res.status(200).json({ success: 'track added' });
+      //}
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ error: 'Error adding Track' });
+    }
+  },
+
+  async removeTracksFromQueue(req, res, nex) {
+    try {
+      console.log('DELETE TRACKS FROM QUEUE');
+      const { plalist_id, tracks } = req.body;
+      const token = await spotifyUtils.getAccessToken(req.user_id);
+      var i = 0;
+      const headers = {
+        Authorization: 'Bearer ' + token,
+      };
+      var uri_data = {
+        ids: `${tracks.join()}`,
+      };
+      try {
+        await axios({
+          method: 'DELETE',
+          url: '	https://api.spotify.com/v1/me/tracks',
+          headers: headers,
+          params: uri_data,
+        });
+      } catch (error) {
+        console.log('REMOVE TRACK FROM QUEUE ERROR');
+        console.log(error);
+      }
+      for (const trackId of tracks) {
+        await HDJTracks.update(
+          { was_played: false },
+          {
+            where: {
+              playlist_id: plalist_id,
+              external_track_id: track,
             },
           }
         );
