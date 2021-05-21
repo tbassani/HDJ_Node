@@ -227,32 +227,31 @@ module.exports = {
           Authorization: 'Bearer ' + token,
         };
         var track = {};
-        await axios({
-          method: 'GET',
-          url: 'https://api.spotify.com/v1/me/player/currently-playing',
-          headers: headers,
-        })
-          .then((response) => {
-            if (response.data.item) {
-              track = {
-                artist_name: response.data.item.artists[1]
-                  ? response.data.item.artists[0].name + ', ' + response.data.item.artists[1].name
-                  : response.data.item.artists[0].name,
-                album_name: response.data.item.album.name,
-                duration: response.data.item.duration_ms,
-                track_name: response.data.item.name,
-                album_art: response.data.item.album.images[0].url,
-                external_track_id: response.data.item.id,
-                is_playing: response.data.is_playing,
-                progress_ms: response.data.progress_ms,
-              };
-            }
-            res.status(200).json(track);
-          })
-          .catch((error) => {
-            console.log(error);
-            res.status(400).json({ error: 'Error getting Track' });
+        try {
+          let response = await axios({
+            method: 'GET',
+            url: 'https://api.spotify.com/v1/me/player/currently-playing',
+            headers: headers,
           });
+          if (response.data.item) {
+            track = {
+              artist_name: response.data.item.artists[1]
+                ? response.data.item.artists[0].name + ', ' + response.data.item.artists[1].name
+                : response.data.item.artists[0].name,
+              album_name: response.data.item.album.name,
+              duration: response.data.item.duration_ms,
+              track_name: response.data.item.name,
+              album_art: response.data.item.album.images[0].url,
+              external_track_id: response.data.item.id,
+              is_playing: response.data.is_playing,
+              progress_ms: response.data.progress_ms,
+            };
+          }
+          res.status(200).json(track);
+        } catch (error) {
+          console.log(error);
+          res.status(400).json({ error: 'Error getting Track' });
+        }
         console.log('GOT TRACK');
       }
     } catch (error) {
