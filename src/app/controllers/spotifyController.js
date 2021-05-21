@@ -305,7 +305,7 @@ module.exports = {
           uri: `spotify:track:${trackId}`,
         };
         try {
-          axios({
+          await axios({
             method: 'POST',
             url: 'https://api.spotify.com/v1/me/player/queue',
             headers: headers,
@@ -316,7 +316,7 @@ module.exports = {
           console.log(error);
         }
 
-        HDJTracks.update(
+        await HDJTracks.update(
           { was_played: true },
           {
             where: {
