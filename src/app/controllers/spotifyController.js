@@ -290,11 +290,10 @@ module.exports = {
     try {
       //Inicialização de variáveis
       console.log('ADD TRACKS TO QUEUE');
-      const { plalist_id, tracks } = req.body;
+      const { playlist_id, tracks } = req.body;
       const token = await spotifyUtils.getAccessToken(req.user_id);
       console.log(tracks);
       var i = 0;
-      const { playlist_id } = req.body;
       const headers = {
         Authorization: 'Bearer ' + token,
       };
@@ -313,7 +312,7 @@ module.exports = {
           });
         } catch (error) {
           console.log('ADD TO TRACK ERROR');
-          console.log(error);
+          //console.log(error);
         }
 
         await HDJTracks.update(
@@ -338,33 +337,39 @@ module.exports = {
   async removeTracksFromQueue(req, res, nex) {
     try {
       console.log('DELETE TRACKS FROM QUEUE');
-      const { plalist_id, tracks } = req.body;
+      const { playlist_id, tracks } = req.body;
       const token = await spotifyUtils.getAccessToken(req.user_id);
       var i = 0;
       const headers = {
         Authorization: 'Bearer ' + token,
-      };
-      var uri_data = {
-        ids: `${tracks.join()}`,
+        contenttype: 'application/json;',
       };
       try {
-        await axios({
-          method: 'DELETE',
-          url: '	https://api.spotify.com/v1/me/tracks',
-          headers: headers,
-          params: uri_data,
-        });
+        // const respRemove = await axios({
+        //   method: 'DELETE',
+        //   url: 'https://api.spotify.com/v1/me/tracks?ids=' + tracks.join(),
+        //   headers: headers,
+        //   data: { ids: tracks },
+        // });
+        for (const trackId of tracks) {
+          const respRemove = await axios({
+            method: 'POST',
+            url: 'https://api.spotify.com/v1/me/player/queue?uri=spotify:track:' + trackId,
+            headers: headers,
+          });
+          console.log('REMOVE TRACKS RESP');
+        }
       } catch (error) {
         console.log('REMOVE TRACK FROM QUEUE ERROR');
-        console.log(error);
+        //console.log(error);
       }
       for (const trackId of tracks) {
         await HDJTracks.update(
           { was_played: false },
           {
             where: {
-              playlist_id: plalist_id,
-              external_track_id: track,
+              playlist_id: playlist_id,
+              external_track_id: trackId,
             },
           }
         );
