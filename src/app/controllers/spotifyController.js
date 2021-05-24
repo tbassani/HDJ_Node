@@ -130,18 +130,12 @@ module.exports = {
       const { track_id, playlist_id } = req.body;
       if (track_id) {
         console.log(req.body);
-        var track = await HDJTracks.findAll({
-          where: {
-            playlist_id: playlist_id,
-            external_track_id: track_id,
-          },
-          raw: true,
-        });
+
         const headers = {
           Authorization: 'Bearer ' + token,
         };
         const body = {
-          uris: [`spotify:track:${track[0].external_track_id}`],
+          uris: [`spotify:track:${track_id}`],
         };
         await axios({
           method: 'PUT',
@@ -151,7 +145,7 @@ module.exports = {
         })
           .then((response) => {
             console.log('Success playing track');
-            res.status(200).json({ success: `Playing Track ${track[0].track_name}` });
+            res.status(200).json({ success: `Playing Track ${track_id}` });
 
             HDJTracks.update(
               { was_played: true },
@@ -164,8 +158,9 @@ module.exports = {
             );
           })
           .catch((error) => {
-            console.log(error);
-            res.status(400).json({ error: 'Error playing Track' });
+            console.log('THIS IS A ERROR');
+            console.log(error.response);
+            res.status(error.response.status).json({ error: 'Error playing Track' });
           });
       } else {
         const headers = {
@@ -180,8 +175,7 @@ module.exports = {
             res.status(200).json({ success: `Playing Track` });
           })
           .catch((error) => {
-            console.log(error);
-            res.status(400).json({ error: 'Error playing Track' });
+            res.status(error.response.status).json({ error: 'Error playing Track' });
           });
       }
     } catch (error) {
