@@ -3,11 +3,10 @@ const spotifyConfig = require('../../config/spotify');
 const Profiles = require('../../models/Profiles');
 const axios = require('axios');
 const { response } = require('express');
-const Users = require('../../models/User');
 const spotifyUtils = require('../../app/spotifyUtils/spotifyAPI');
 const HDJTracks = require('../../models/HDJTracks');
 const HDJPlaylists = require('../../models/HDJPlaylists');
-const UserHistory = require('../../models/UserHistory');
+const TopTracks = require('../../models/TopTracks');
 
 function generateAuthURL(user_id) {
   return `https://accounts.spotify.com/authorize?client_id=${
@@ -327,52 +326,140 @@ module.exports = {
     }
   },
 
-  async removeTracksFromQueue(req, res, nex) {
+  async addTopTracksToQueue(req, res, nex) {
     try {
-      console.log('DELETE TRACKS FROM QUEUE');
+      //Inicialização de variáveis
+      console.log('ADD TOP TRACKS TO QUEUE');
       const { playlist_id, tracks } = req.body;
       const token = await spotifyUtils.getAccessToken(req.user_id);
       var i = 0;
       const headers = {
         Authorization: 'Bearer ' + token,
-        contenttype: 'application/json;',
       };
-      try {
-        // const respRemove = await axios({
-        //   method: 'DELETE',
-        //   url: 'https://api.spotify.com/v1/me/tracks?ids=' + tracks.join(),
-        //   headers: headers,
-        //   data: { ids: tracks },
-        // });
-        for (const trackId of tracks) {
-          const respRemove = await axios({
+
+      for (const track of tracks) {
+        var uri_data = {
+          uri: `spotify:track:${track.externalId}`,
+        };
+        try {
+          await axios({
             method: 'POST',
-            url: 'https://api.spotify.com/v1/me/player/queue?uri=spotify:track:' + trackId,
+            url: 'https://api.spotify.com/v1/me/player/queue',
             headers: headers,
+            params: uri_data,
           });
-          console.log('REMOVE TRACKS RESP');
+        } catch (error) {
+          console.log('ADD TO TRACK TO QUEUE ERROR');
+          console.log(error);
         }
-      } catch (error) {
-        console.log('REMOVE TRACK FROM QUEUE ERROR');
-        //console.log(error);
-      }
-      for (const trackId of tracks) {
+
         await HDJTracks.update(
-          { was_played: false },
+          { was_played: true },
           {
             where: {
               playlist_id: playlist_id,
-              external_track_id: trackId,
+              external_track_id: track.externalId,
+            },
+          }
+        );
+        await TopTracks.create(
+          {
+            user_id: req.user_id,
+            playlist_id: track.mixId,
+            external_track_id: track.externalId,
+            score: track.score,
+            track_name: track.title,
+            was_played: false,
+            duration: track.duration,
+            deleted_at: null,
+            album_name: track.albumName,
+            album_art: track.artURL,
+            artist_name: track.artists,
+            genre: track.genre,
+          },
+          {
+            where: {
+              playlist_id: playlist_id,
             },
           }
         );
       }
 
-      res.status(200).json({ success: 'track added' });
+      res.status(200).json({ success: 'track added to queue' });
       //}
     } catch (error) {
       console.log(error);
-      res.status(400).json({ error: 'Error adding Track' });
+      res.status(400).json({ error: 'Error adding Track to queue' });
+    }
+  },
+
+  async getTopTracks(req, res, nex) {
+    try {
+      //Inicialização de variáveis
+      console.log('GET TOP TRACKS TO QUEUE');
+      const { playlist_id } = req.body;
+
+      const topTracks = await TopTracks.findAll(
+        { was_played: true },
+        {
+          where: {
+            playlist_id: playlist_id,
+          },
+          raw: true,
+        }
+      );
+
+      res.status(200).json(topTracks);
+      //}
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ error: 'Error getting Top Tracks' });
+    }
+  },
+
+  async removeTracksFromQueue(req, res, nex) {
+    console.log('DELETE TRACKS FROM QUEUE');
+    const { playlist_id } = req.body;
+    const token = await spotifyUtils.getAccessToken(req.user_id);
+    var i = 0;
+    const headers = {
+      Authorization: 'Bearer ' + token,
+      contenttype: 'application/json;',
+    };
+    try {
+      var tracks = await TopTracks.findAll({
+        where: {
+          playlist_id: playlist_id,
+        },
+        raw: true,
+      });
+      for (const track of tracks) {
+        await axios({
+          method: 'POST',
+          url: 'https://api.spotify.com/v1/me/player/next',
+          headers: headers,
+        });
+        await HDJTracks.update(
+          { was_played: false },
+          {
+            where: {
+              playlist_id: playlist_id,
+              external_track_id: track.external_track_id,
+            },
+          }
+        );
+        await TopTracks.destroy({
+          where: {
+            playlist_id: playlist_id,
+            external_track_id: track.external_track_id,
+          },
+        });
+      }
+      res.status(200).json({ success: 'top track removed' });
+    } catch (error) {
+      console.log('REMOVE TRACK FROM QUEUE ERROR');
+      console.log(error);
+      res.status(400).json({ error: 'Error removing Top Track' });
     }
   },
 

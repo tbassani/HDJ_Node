@@ -7,6 +7,7 @@ const hdjPlaylists = require('../models/HDJPlaylists');
 const hdjTracks = require('../models/HDJTracks');
 const userHistory = require('../models/UserHistory');
 const hdjGroups = require('../models/HDJGroups');
+const topTracks = require('../models/TopTracks');
 const analytics = require('../models/Analytics');
 
 const conn = new Sequelize(process.env.DB_URL);
@@ -18,6 +19,7 @@ hdjPlaylists.init(conn);
 hdjTracks.init(conn);
 userHistory.init(conn);
 hdjGroups.init(conn);
+topTracks.init(conn);
 analytics.init(conn);
 
 module.exports = conn;
