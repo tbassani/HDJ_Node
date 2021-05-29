@@ -341,18 +341,14 @@ module.exports = {
         var uri_data = {
           uri: `spotify:track:${track.externalId}`,
         };
-        try {
-          await axios({
-            method: 'POST',
-            url: 'https://api.spotify.com/v1/me/player/queue',
-            headers: headers,
-            params: uri_data,
-          });
-        } catch (error) {
-          console.log('ADD TO TRACK TO QUEUE ERROR');
-          console.log(error);
-        }
-
+        await axios({
+          method: 'POST',
+          url: 'https://api.spotify.com/v1/me/player/queue',
+          headers: headers,
+          params: uri_data,
+        });
+      }
+      for (const track of tracks) {
         await HDJTracks.update(
           { was_played: true },
           {
@@ -362,10 +358,30 @@ module.exports = {
             },
           }
         );
+      }
+      res.status(200).json({ success: 'track added to queue' });
+      //}
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ error: 'Error adding Track to queue' });
+    }
+  },
+
+  async setTopTracks(req, res, nex) {
+    try {
+      //Inicialização de variáveis
+      console.log('SET TOP TRACKS');
+      const { playlist_id, tracks } = req.body;
+      await TopTracks.destroy({
+        where: {
+          playlist_id: playlist_id,
+        },
+      });
+      for (const track of tracks) {
         await TopTracks.create(
           {
             user_id: req.user_id,
-            playlist_id: track.mixId,
+            playlist_id: playlist_id,
             external_track_id: track.externalId,
             score: track.score,
             track_name: track.title,
@@ -385,11 +401,11 @@ module.exports = {
         );
       }
 
-      res.status(200).json({ success: 'track added to queue' });
+      res.status(200).json({ success: 'top tracks set' });
       //}
     } catch (error) {
       console.log(error);
-      res.status(400).json({ error: 'Error adding Track to queue' });
+      res.status(400).json({ error: 'Error setting top tracks' });
     }
   },
 
@@ -439,6 +455,13 @@ module.exports = {
           url: 'https://api.spotify.com/v1/me/player/next',
           headers: headers,
         });
+      }
+      await axios({
+        method: 'PUT',
+        url: 'https://api.spotify.com/v1/me/player/pause',
+        headers: headers,
+      });
+      for (const track of tracks) {
         await HDJTracks.update(
           { was_played: false },
           {
@@ -455,6 +478,7 @@ module.exports = {
           },
         });
       }
+
       res.status(200).json({ success: 'top track removed' });
     } catch (error) {
       console.log('REMOVE TRACK FROM QUEUE ERROR');
