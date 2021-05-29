@@ -474,7 +474,6 @@ module.exports = {
         await TopTracks.destroy({
           where: {
             playlist_id: playlist_id,
-            external_track_id: track.external_track_id,
           },
         });
       }
