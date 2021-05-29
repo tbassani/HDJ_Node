@@ -378,27 +378,20 @@ module.exports = {
         },
       });
       for (const track of tracks) {
-        await TopTracks.create(
-          {
-            user_id: req.user_id,
-            playlist_id: playlist_id,
-            external_track_id: track.externalId,
-            score: track.score,
-            track_name: track.title,
-            was_played: false,
-            duration: track.duration,
-            deleted_at: null,
-            album_name: track.albumName,
-            album_art: track.artURL,
-            artist_name: track.artists,
-            genre: track.genre,
-          },
-          {
-            where: {
-              playlist_id: playlist_id,
-            },
-          }
-        );
+        await TopTracks.create({
+          user_id: req.user_id,
+          playlist_id: playlist_id,
+          external_track_id: track.externalId,
+          score: track.score,
+          track_name: track.title,
+          was_played: false,
+          duration: track.duration,
+          deleted_at: null,
+          album_name: track.albumName,
+          album_art: track.artURL,
+          artist_name: track.artists,
+          genre: track.genre,
+        });
       }
 
       res.status(200).json({ success: 'top tracks set' });
