@@ -341,12 +341,29 @@ module.exports = {
         var uri_data = {
           uri: `spotify:track:${track.externalId}`,
         };
+        const timeout = setTimeout(() => {
+          console.log('Wait 500ms to add another track');
+        }, 500);
+
+        clearTimeout(timeout);
         await axios({
           method: 'POST',
           url: 'https://api.spotify.com/v1/me/player/queue',
           headers: headers,
           params: uri_data,
-        });
+        })
+          .then((resp) => {
+            console.log('Track added to queue');
+          })
+          .catch(async (error) => {
+            console.log(error);
+            await axios({
+              method: 'POST',
+              url: 'https://api.spotify.com/v1/me/player/queue',
+              headers: headers,
+              params: uri_data,
+            });
+          });
       }
       for (const track of tracks) {
         await HDJTracks.update(
