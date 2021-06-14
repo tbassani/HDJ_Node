@@ -428,55 +428,52 @@ module.exports = {
 
   async removeTracksFromQueue(req, res, nex) {
     console.log('DELETE TRACKS FROM QUEUE');
-    const { playlist_id } = req.body;
+    const { owner_id } = req.body;
     const token = await spotifyUtils.getAccessToken(req.user_id);
     var i = 0;
     const headers = {
       Authorization: 'Bearer ' + token,
       contenttype: 'application/json;',
     };
+    var tracks = [];
     try {
-      var tracks = await TopTracks.findAll({
+      tracks = await TopTracks.findAll({
         where: {
-          playlist_id: playlist_id,
+          user_id: owner_id,
         },
         raw: true,
       });
-      for (const track of tracks) {
-        await axios({
-          method: 'POST',
-          url: 'https://api.spotify.com/v1/me/player/next',
-          headers: headers,
-        });
-      }
-      await axios({
-        method: 'PUT',
-        url: 'https://api.spotify.com/v1/me/player/pause',
-        headers: headers,
-      });
-      for (const track of tracks) {
-        await HDJTracks.update(
-          { was_played: false },
-          {
-            where: {
-              playlist_id: playlist_id,
-              external_track_id: track.external_track_id,
-            },
-          }
-        );
-        await TopTracks.destroy({
-          where: {
-            playlist_id: playlist_id,
-          },
-        });
-      }
-
-      res.status(200).json({ success: 'top track removed' });
     } catch (error) {
       console.log('REMOVE TRACK FROM QUEUE ERROR');
       console.log(error);
       res.status(400).json({ error: 'Error removing Top Track' });
     }
+
+    for (const track of tracks) {
+      try {
+        await axios({
+          method: 'POST',
+          url: 'https://api.spotify.com/v1/me/player/next',
+          headers: headers,
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    try {
+      await TopTracks.destroy({
+        where: {
+          user_id: owner_id,
+        },
+      });
+    } catch (error) {
+      console.log('REMOVE TRACK FROM QUEUE ERROR');
+      console.log(error);
+      res.status(400).json({ error: 'Error removing Top Track' });
+    }
+
+    res.status(200).json({ success: 'top track removed' });
   },
 
   async searchPlaylistsAndTracks(req, res, nex) {
