@@ -341,9 +341,6 @@ module.exports = {
         var uri_data = {
           uri: `spotify:track:${track.externalId}`,
         };
-        const timeout = setTimeout(() => {
-          console.log('Wait 500ms to add another track');
-        }, 1000);
 
         await axios({
           method: 'POST',
@@ -353,7 +350,6 @@ module.exports = {
         })
           .then((resp) => {
             console.log('Track added to queue');
-            clearTimeout(timeout);
           })
           .catch(async (error) => {
             console.log(error);
@@ -363,7 +359,6 @@ module.exports = {
               headers: headers,
               params: uri_data,
             });
-            clearTimeout(timeout);
           });
       }
       for (const track of tracks) {
