@@ -327,6 +327,7 @@ module.exports = {
   },
 
   async addTopTracksToQueue(req, res, nex) {
+    const timer = (ms) => new Promise((res) => setTimeout(res, ms));
     try {
       //Inicialização de variáveis
       console.log('ADD TOP TRACKS TO QUEUE');
@@ -359,6 +360,7 @@ module.exports = {
               params: uri_data,
             });
           });
+        await timer(2000);
       }
       for (const track of tracks) {
         await HDJTracks.update(
