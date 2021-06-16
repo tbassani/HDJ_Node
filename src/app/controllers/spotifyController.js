@@ -360,7 +360,7 @@ module.exports = {
               params: uri_data,
             });
           });
-        await timer(2000);
+        await timer(1000);
       }
       for (const track of tracks) {
         await HDJTracks.update(
