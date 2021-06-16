@@ -328,57 +328,74 @@ module.exports = {
 
   async addTopTracksToQueue(req, res, nex) {
     const timer = (ms) => new Promise((res) => setTimeout(res, ms));
-    try {
-      //Inicialização de variáveis
-      console.log('ADD TOP TRACKS TO QUEUE');
-      const { playlist_id, tracks } = req.body;
-      const token = await spotifyUtils.getAccessToken(req.user_id);
-      var i = 0;
-      const headers = {
-        Authorization: 'Bearer ' + token,
-      };
 
-      for (const track of tracks) {
-        var uri_data = {
-          uri: `spotify:track:${track.externalId}`,
-        };
-        await axios({
-          method: 'POST',
-          url: 'https://api.spotify.com/v1/me/player/queue',
-          headers: headers,
-          params: uri_data,
+    //Inicialização de variáveis
+    console.log('ADD TOP TRACKS TO QUEUE');
+    const { playlist_id, tracks } = req.body;
+    const token = await spotifyUtils.getAccessToken(req.user_id);
+    var i = 0;
+    const headers = {
+      Authorization: 'Bearer ' + token,
+    };
+
+    for (const track of tracks) {
+      var uri_data = {
+        uri: `spotify:track:${track.externalId}`,
+      };
+      await axios({
+        method: 'POST',
+        url: 'https://api.spotify.com/v1/me/player/queue',
+        headers: headers,
+        params: uri_data,
+      })
+        .then((resp) => {
+          console.log('Track added to queue');
         })
-          .then((resp) => {
-            console.log('Track added to queue');
+        .catch(async (error) => {
+          console.log(error);
+          await timer(2000);
+          await axios({
+            method: 'POST',
+            url: 'https://api.spotify.com/v1/me/player/queue',
+            headers: headers,
+            params: uri_data,
           })
-          .catch(async (error) => {
-            console.log(error);
-            await axios({
-              method: 'POST',
-              url: 'https://api.spotify.com/v1/me/player/queue',
-              headers: headers,
-              params: uri_data,
+            .then((resp) => {
+              console.log('Track added to queue');
+            })
+            .catch(async (error) => {
+              console.log(error);
+              await timer(2000);
+              await axios({
+                method: 'POST',
+                url: 'https://api.spotify.com/v1/me/player/queue',
+                headers: headers,
+                params: uri_data,
+              })
+                .then((resp) => {
+                  console.log('Track added to queue');
+                })
+                .catch(async (error) => {
+                  console.log(error);
+                  res.status(400).json({ error: 'track not added to queue' });
+                });
             });
-          });
-        await timer(3000);
-      }
-      for (const track of tracks) {
-        await HDJTracks.update(
-          { was_played: true },
-          {
-            where: {
-              playlist_id: playlist_id,
-              external_track_id: track.externalId,
-            },
-          }
-        );
-      }
-      res.status(200).json({ success: 'track added to queue' });
-      //}
-    } catch (error) {
-      console.log(error);
-      res.status(400).json({ error: 'Error adding Track to queue' });
+        });
+      await timer(2000);
     }
+    for (const track of tracks) {
+      await HDJTracks.update(
+        { was_played: true },
+        {
+          where: {
+            playlist_id: playlist_id,
+            external_track_id: track.externalId,
+          },
+        }
+      );
+    }
+    res.status(200).json({ success: 'track added to queue' });
+    //}
   },
 
   async setTopTracks(req, res, nex) {
