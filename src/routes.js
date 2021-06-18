@@ -34,6 +34,7 @@ appRoutes
   .post('/playlist/mix', playlistController.mixHDJPlaylist)
   .post('/spotify/add_to_queue', spotifyController.addTracksToQueue)
   .post('/spotify/add_top_to_queue', spotifyController.addTopTracksToQueue)
+  .post('/playlists/update_queue', playlistController.updateQueue)
   .post('/spotify/set_top_tracks', spotifyController.setTopTracks)
   .get('/spotify/get_top_tracks', spotifyController.getTopTracks)
   .delete('/spotify/delete_from_queue', spotifyController.removeTracksFromQueue)

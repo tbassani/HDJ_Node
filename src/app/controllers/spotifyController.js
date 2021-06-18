@@ -449,6 +449,8 @@ module.exports = {
         }
       );
 
+      console.log(topTracks);
+
       res.status(200).json(topTracks);
       //}
     } catch (error) {
