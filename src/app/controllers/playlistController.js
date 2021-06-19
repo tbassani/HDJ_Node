@@ -452,6 +452,7 @@ module.exports = {
       }
       res.status(200).json({ success: 'track added to queue' });
     } catch (error) {
+      console.log(error);
       res.status(400).json({ error: 'Error adding track to queue' });
     }
     //}
