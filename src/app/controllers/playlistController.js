@@ -275,7 +275,6 @@ module.exports = {
 
     const setNewTopTracks = (tracks, oldTopTracks, beginDuration, currentTrack) => {
       let newTopTracks = [...oldTopTracks];
-      console.log('ADD TO QUEUE FROM PLAY');
       let duration = beginDuration;
       let i = 0;
       while (i < tracks.length && duration < 1800000) {
