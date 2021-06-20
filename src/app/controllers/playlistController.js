@@ -350,8 +350,8 @@ module.exports = {
           raw: true,
           order: [['score', 'DESC']],
         });
-        console.log(updatedTracks[0]);
-        let updatedTopTracks = setNewTopTracks(updatedTracks[0], [], minDuration, playingTrack);
+        console.log(updatedTracks);
+        let updatedTopTracks = setNewTopTracks(updatedTracks, [], minDuration, playingTrack);
 
         if (updatedTopTracks.duration < 1800000) {
           console.log('NOT ENOUGH TRACKS');
