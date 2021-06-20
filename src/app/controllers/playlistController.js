@@ -355,7 +355,7 @@ module.exports = {
         if (updatedTopTracks.duration < 1800000) {
           console.log('NOT ENOUGH TRACKS');
           //reset playlist
-          await this.resetHDJPlaylist(playlist_id);
+          await resetHDJPlaylist(playlist_id);
           //get ranking
           var newTracks = await HDJTracks.findAll({
             where: { playlist_id: playlist_id, was_played: false },
