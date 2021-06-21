@@ -362,6 +362,7 @@ module.exports = {
           where: { playlist_id: playlist_id, was_played: false },
           raw: true,
           order: [['score', 'DESC']],
+          limit: 20,
         });
         let updatedTopTracks = setNewTopTracks(updatedTracks, oldTracks, minDuration, playingTrack);
 
