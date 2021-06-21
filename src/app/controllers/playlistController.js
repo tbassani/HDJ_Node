@@ -170,11 +170,7 @@ module.exports = {
           var spotifyRawArtist = await spotifyUtils.getArtist(spotifyRawTrack.artists[0].id, token);
           const [hdjtrack, created] = await HDJTracks.findOrCreate({
             where: {
-              playlist_id: hdj_playlist_id,
-              track_name: spotifyRawTrack.name,
-              artist_name: spotifyRawTrack.artists[1]
-                ? spotifyRawTrack.artists[0].name + ', ' + spotifyRawTrack.artists[1].name
-                : spotifyRawTrack.artists[0].name,
+              external_track_id: spotifyRawTrack.id,
             },
             defaults: {
               user_id: req.user_id,
