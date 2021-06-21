@@ -371,9 +371,7 @@ module.exports = {
           );
         }
 
-        const addedTopTracks = updatedTopTracks.newTopTracks.filter(
-          (track) => track.external_track_id !== playingTrack.external_track_id
-        );
+        const addedTopTracks = updatedTopTracks.newTopTracks;
         await TopTracks.destroy({
           where: {
             playlist_id: playlist_id,

@@ -443,7 +443,6 @@ module.exports = {
 
       const topTracks = await TopTracks.findAll({
         where: {
-          was_played: true,
           playlist_id: playlist_id,
         },
         raw: true,
