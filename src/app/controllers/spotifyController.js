@@ -437,7 +437,7 @@ module.exports = {
     try {
       //Inicialização de variáveis
       console.log('GET TOP TRACKS TO QUEUE');
-      const playlist_id = req.query.playlist_id;
+      const { playlist_id } = req.params;
 
       console.log(playlist_id);
 
