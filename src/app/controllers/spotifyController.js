@@ -448,8 +448,6 @@ module.exports = {
         raw: true,
       });
 
-      console.log(topTracks);
-
       res.status(200).json(topTracks);
       //}
     } catch (error) {

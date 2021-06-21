@@ -305,7 +305,29 @@ module.exports = {
         method: 'GET',
         url: 'https://api.spotify.com/v1/me/player/currently-playing',
         headers: headers,
-      });
+      })
+        .then((resp) => {
+          console.log('Got playing track');
+        })
+        .catch(async (error) => {
+          timer(2000);
+          response = await axios({
+            method: 'GET',
+            url: 'https://api.spotify.com/v1/me/player/currently-playing',
+            headers: headers,
+          })
+            .then((resp) => {
+              console.log('Got playing track');
+            })
+            .catch(async (error) => {
+              timer(2000);
+              response = await axios({
+                method: 'GET',
+                url: 'https://api.spotify.com/v1/me/player/currently-playing',
+                headers: headers,
+              });
+            });
+        });
 
       if (response.data.item) {
         playingTrack = {
