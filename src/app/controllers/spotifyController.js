@@ -439,6 +439,8 @@ module.exports = {
       console.log('GET TOP TRACKS TO QUEUE');
       const { playlist_id } = req.body;
 
+      console.log(playlist_id);
+
       const topTracks = await TopTracks.findAll({
         where: {
           was_played: true,
