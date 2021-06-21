@@ -385,6 +385,7 @@ module.exports = {
         }
 
         const addedTopTracks = updatedTopTracks.newTopTracks;
+        const toBeAddedToQueue = [...updatedTopTracks.newTopTracks];
         await TopTracks.destroy({
           where: {
             playlist_id: playlist_id,
@@ -408,7 +409,7 @@ module.exports = {
           });
         }
 
-        for (const track of addedTopTracks) {
+        for (const track of toBeAddedToQueue) {
           var uri_data = {
             uri: `spotify:track:${track.external_track_id}`,
           };
