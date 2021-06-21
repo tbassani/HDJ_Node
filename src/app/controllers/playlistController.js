@@ -377,6 +377,7 @@ module.exports = {
             playlist_id: playlist_id,
           },
         });
+        addedTopTracks.unshift(playingTrack);
         for (const track of addedTopTracks) {
           await TopTracks.create({
             user_id: req.user_id,
