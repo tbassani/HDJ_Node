@@ -274,11 +274,11 @@ module.exports = {
       let duration = beginDuration;
       let i = 0;
       while (i < tracks.length && duration < 1800000) {
-        if (tracks[i].external_track_id !== currentTrack.external_track_id) {
-          duration = duration + tracks[i].duration;
-          console.log('ADD TO QUEUE: ' + i);
-          newTopTracks.push(tracks[i]);
-        }
+        //if (tracks[i].external_track_id !== currentTrack.external_track_id) {
+        duration = duration + tracks[i].duration;
+        console.log('ADD TO QUEUE: ' + i);
+        newTopTracks.push(tracks[i]);
+        //}
         i++;
       }
       return {
