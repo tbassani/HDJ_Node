@@ -270,7 +270,7 @@ module.exports = {
     const timer = (ms) => new Promise((res) => setTimeout(res, ms));
 
     const setNewTopTracks = (tracks, oldTopTracks, beginDuration, currentTrack) => {
-      let newTopTracks = [...oldTopTracks];
+      let newTopTracks = [];
       let duration = beginDuration;
       let i = 0;
       while (i < tracks.length && duration < 1800000) {
@@ -302,22 +302,20 @@ module.exports = {
         url: 'https://api.spotify.com/v1/me/player/currently-playing',
         headers: headers,
       });
-
-      if (!response || !response.data || response.data.item) {
-        timer(2000);
-        response = await axios({
-          method: 'GET',
-          url: 'https://api.spotify.com/v1/me/player/currently-playing',
-          headers: headers,
-        });
-      }
-      if (!response || !response.data || response.data.item) {
-        timer(2000);
-        response = await axios({
-          method: 'GET',
-          url: 'https://api.spotify.com/v1/me/player/currently-playing',
-          headers: headers,
-        });
+      let awaitTime = 0;
+      while ((!response || !response.data || !response.data.item) && awaitTime < 10000) {
+        await timer(2000);
+        awaitTime = awaitTime + 2000;
+        try {
+          console.log('DID NOT GET RESP');
+          response = await axios({
+            method: 'GET',
+            url: 'https://api.spotify.com/v1/me/player/currently-playing',
+            headers: headers,
+          });
+        } catch (error) {
+          console.log(error);
+        }
       }
 
       if (response.data.item) {
@@ -333,138 +331,140 @@ module.exports = {
           is_playing: response.data.is_playing,
           progress_ms: response.data.progress_ms,
         };
-      }
 
-      const topTracks = await TopTracks.findAll(
-        { was_played: true },
-        {
-          where: {
-            playlist_id: playlist_id,
-          },
-          raw: true,
-        }
-      );
-      console.log('FILTER TOP TRACKS');
-      const topTracksCheck = topTracks.filter((track) => {
-        return track.external_track_id === playingTrack.external_track_id;
-      });
-      const index = topTracks.indexOf(topTracksCheck[0]);
-      console.log('TOP TRACK INDEX: ' + index);
-      if (index > 0 || topTracks.length === 0) {
-        let minDuration = 0;
-        let oldTracks = [];
-        console.log('OLD TRACK INDEX: ' + index);
-        for (let n = index + 1; n < topTracks.length; n++) {
-          minDuration = minDuration + topTracks[n].duration;
-          oldTracks.push(topTracks[n]);
-        }
-        var updatedTracks = await HDJTracks.findAll({
-          where: { playlist_id: playlist_id, was_played: false },
-          raw: true,
-          order: [['score', 'DESC']],
-          limit: 20,
+        const topTracks = await TopTracks.findAll(
+          { was_played: true },
+          {
+            where: {
+              playlist_id: playlist_id,
+            },
+            raw: true,
+          }
+        );
+        console.log('FILTER TOP TRACKS');
+        const topTracksCheck = topTracks.filter((track) => {
+          return track.external_track_id === playingTrack.external_track_id;
         });
-        let updatedTopTracks = setNewTopTracks(updatedTracks, oldTracks, minDuration, playingTrack);
-
-        if (updatedTopTracks.duration < 1800000) {
-          console.log('NOT ENOUGH TRACKS');
-          //reset playlist
-          await resetHDJPlaylist(playlist_id);
-          //get ranking
-          var newTracks = await HDJTracks.findAll({
+        const index = topTracks.indexOf(topTracksCheck[0]);
+        console.log('TOP TRACK INDEX: ' + index);
+        if (index > 0 || topTracks.length === 0) {
+          let minDuration = 0;
+          let oldTracks = [];
+          console.log('OLD TRACK INDEX: ' + index);
+          for (let n = index + 1; n < topTracks.length; n++) {
+            minDuration = minDuration + topTracks[n].duration;
+            oldTracks.push(topTracks[n]);
+          }
+          var updatedTracks = await HDJTracks.findAll({
             where: { playlist_id: playlist_id, was_played: false },
             raw: true,
             order: [['score', 'DESC']],
+            limit: 20,
           });
-          updatedTopTracks = setNewTopTracks(
-            newTracks,
-            updatedTopTracks.newTopTracks,
-            updatedTopTracks.duration,
-            playingTrack
-          );
-        }
+          let updatedTopTracks = setNewTopTracks(updatedTracks, [], minDuration, playingTrack);
 
-        const addedTopTracks = updatedTopTracks.newTopTracks;
-        const toBeAddedToQueue = [...updatedTopTracks.newTopTracks];
-        await TopTracks.destroy({
-          where: {
-            playlist_id: playlist_id,
-          },
-        });
-        addedTopTracks.unshift(playingTrack);
-        for (const track of addedTopTracks) {
-          await TopTracks.create({
-            user_id: req.user_id,
-            playlist_id: playlist_id,
-            external_track_id: track.external_track_id,
-            score: track.score,
-            track_name: track.track_name,
-            was_played: false,
-            duration: track.duration,
-            deleted_at: null,
-            album_name: track.album_name,
-            album_art: track.album_art,
-            artist_name: track.artist_name,
-            genre: track.genre,
-          });
-        }
-
-        for (const track of toBeAddedToQueue) {
-          var uri_data = {
-            uri: `spotify:track:${track.external_track_id}`,
-          };
-          await axios({
-            method: 'POST',
-            url: 'https://api.spotify.com/v1/me/player/queue',
-            headers: headers,
-            params: uri_data,
-          })
-            .then((resp) => {
-              console.log('Track added to queue');
-            })
-            .catch(async (error) => {
-              console.log(error);
-              await timer(2000);
-              await axios({
-                method: 'POST',
-                url: 'https://api.spotify.com/v1/me/player/queue',
-                headers: headers,
-                params: uri_data,
-              })
-                .then((resp) => {
-                  console.log('Track added to queue');
-                })
-                .catch(async (error) => {
-                  console.log(error);
-                  await timer(2000);
-                  await axios({
-                    method: 'POST',
-                    url: 'https://api.spotify.com/v1/me/player/queue',
-                    headers: headers,
-                    params: uri_data,
-                  })
-                    .then((resp) => {
-                      console.log('Track added to queue');
-                    })
-                    .catch(async (error) => {
-                      console.log(error);
-                      res.status(400).json({ error: 'track not added to queue' });
-                    });
-                });
+          if (updatedTopTracks.duration < 1800000) {
+            console.log('NOT ENOUGH TRACKS');
+            //reset playlist
+            await resetHDJPlaylist(playlist_id);
+            //get ranking
+            var newTracks = await HDJTracks.findAll({
+              where: { playlist_id: playlist_id, was_played: false },
+              raw: true,
+              order: [['score', 'DESC']],
             });
-          await timer(2000);
-          await HDJTracks.update(
-            { was_played: true },
-            {
-              where: {
-                playlist_id: playlist_id,
-                external_track_id: track.external_track_id,
-              },
-            }
-          );
+            updatedTopTracks = setNewTopTracks(
+              newTracks,
+              [],
+              updatedTopTracks.duration,
+              playingTrack
+            );
+          }
+
+          const addedTopTracks = [playingTrack, ...oldTracks, ...updatedTopTracks.newTopTracks];
+          const toBeAddedToQueue = [...updatedTopTracks.newTopTracks];
+          await TopTracks.destroy({
+            where: {
+              playlist_id: playlist_id,
+            },
+          });
+          for (const track of addedTopTracks) {
+            track;
+            await TopTracks.create({
+              user_id: req.user_id,
+              playlist_id: playlist_id,
+              external_track_id: track.external_track_id,
+              score: track.score,
+              track_name: track.track_name,
+              was_played: false,
+              duration: track.duration,
+              deleted_at: null,
+              album_name: track.album_name,
+              album_art: track.album_art,
+              artist_name: track.artist_name,
+              genre: track.genre,
+            });
+          }
+
+          for (const track of toBeAddedToQueue) {
+            var uri_data = {
+              uri: `spotify:track:${track.external_track_id}`,
+            };
+            await axios({
+              method: 'POST',
+              url: 'https://api.spotify.com/v1/me/player/queue',
+              headers: headers,
+              params: uri_data,
+            })
+              .then((resp) => {
+                console.log('Track added to queue');
+              })
+              .catch(async (error) => {
+                console.log(error);
+                await timer(2000);
+                await axios({
+                  method: 'POST',
+                  url: 'https://api.spotify.com/v1/me/player/queue',
+                  headers: headers,
+                  params: uri_data,
+                })
+                  .then((resp) => {
+                    console.log('Track added to queue');
+                  })
+                  .catch(async (error) => {
+                    console.log(error);
+                    await timer(2000);
+                    await axios({
+                      method: 'POST',
+                      url: 'https://api.spotify.com/v1/me/player/queue',
+                      headers: headers,
+                      params: uri_data,
+                    })
+                      .then((resp) => {
+                        console.log('Track added to queue');
+                      })
+                      .catch(async (error) => {
+                        console.log(error);
+                        res.status(400).json({ error: 'track not added to queue' });
+                      });
+                  });
+              });
+            await timer(2000);
+            await HDJTracks.update(
+              { was_played: true },
+              {
+                where: {
+                  playlist_id: playlist_id,
+                  external_track_id: track.external_track_id,
+                },
+              }
+            );
+          }
         }
+        res.status(200).json({ success: 'track added to queue' });
+      } else {
+        res.status(400).json({ error: 'Error adding track to queue' });
       }
-      res.status(200).json({ success: 'track added to queue' });
     } catch (error) {
       console.log(error);
       res.status(400).json({ error: 'Error adding track to queue' });
