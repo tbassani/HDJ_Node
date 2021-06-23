@@ -635,7 +635,6 @@ module.exports = {
   async getAvailableDevices(req, res, nex) {
     console.log('GET AVAILABLE DEVICES');
     const token = await spotifyUtils.getAccessToken(req.user_id);
-    var i = 0;
     const headers = {
       Authorization: 'Bearer ' + token,
       contenttype: 'application/json;',
@@ -647,6 +646,7 @@ module.exports = {
         url: 'https://api.spotify.com/v1/me/player/devices',
         headers: headers,
       });
+      console.log(response);
       res.status(200).json({ devices: response.devices });
     } catch (error) {
       console.log('GET AVAILABLE DEVICES ERROR');
