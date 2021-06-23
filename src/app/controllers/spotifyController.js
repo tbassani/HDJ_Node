@@ -646,8 +646,8 @@ module.exports = {
         url: 'https://api.spotify.com/v1/me/player/devices',
         headers: headers,
       });
-      console.log(response);
-      res.status(200).json({ devices: response.devices });
+
+      res.status(200).json({ devices: response.data.devices });
     } catch (error) {
       console.log('GET AVAILABLE DEVICES ERROR');
       console.log(error);
