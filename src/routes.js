@@ -37,6 +37,7 @@ appRoutes
   .post('/playlists/update_queue', playlistController.updateQueue)
   .post('/spotify/set_top_tracks', spotifyController.setTopTracks)
   .get('/spotify/get_top_tracks/:playlist_id', spotifyController.getTopTracks)
+  .get('/spotify/get_user_devices', spotifyController.getAvailableDevices)
   .delete('/spotify/delete_from_queue', spotifyController.removeTracksFromQueue)
   .post('/playlist/add', playlistController.addToHDJPlaylist)
   .post('/track/upvote', playlistController.upVoteTrack)
