@@ -297,6 +297,7 @@ module.exports = {
     var playingTrack = {};
 
     try {
+      await timer(2000);
       let response = await axios({
         method: 'GET',
         url: 'https://api.spotify.com/v1/me/player/currently-playing',
