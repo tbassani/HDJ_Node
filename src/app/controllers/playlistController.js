@@ -129,6 +129,7 @@ module.exports = {
               element.artists ? element.artists[0].id : '',
               token
             );
+            console.log(element.track.name);
             const [hdjtrackFromPlaylist, trackCreated] = await HDJTracks.findOrCreate({
               where: {
                 track_name: element.track.name,
