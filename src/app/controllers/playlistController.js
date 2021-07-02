@@ -121,14 +121,11 @@ module.exports = {
         console.log('PLAYLIST id:' + playlist.id);
         var spotifyRawTracks = await spotifyUtils.getPlaylistTrack(playlist.id, token);
         var tracks = spotifyRawTracks.tracks.items;
-        console.log('HAS TRACKS');
         for (const key in tracks) {
           if (tracks.hasOwnProperty(key)) {
             const element = tracks[key];
-            var spotifyRawArtist = await spotifyUtils.getArtist(
-              element.artists ? element.artists[0].id : '',
-              token
-            );
+            console.log('ARTISTIS FROM PLALIST');
+            var spotifyRawArtist = await spotifyUtils.getArtist(element.track.artists[0].id, token);
             console.log(element.track.name);
             const [hdjtrackFromPlaylist, trackCreated] = await HDJTracks.findOrCreate({
               where: {
