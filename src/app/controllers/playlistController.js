@@ -88,7 +88,6 @@ module.exports = {
       });
       var token = await spotifyUtils.getAccessToken(req.user_id);
       console.log('NEW TOKEN');
-      console.log(token);
       tracks.items.forEach(async (track) => {
         console.log('TRACK id:' + track.id);
         var spotifyRawTrack = await spotifyUtils.getTrack(track.id, token);
@@ -123,7 +122,6 @@ module.exports = {
         var spotifyRawTracks = await spotifyUtils.getPlaylistTrack(playlist.id, token);
         var tracks = spotifyRawTracks.tracks.items;
         console.log('HAS TRACKS');
-        console.log(tracks);
         for (const key in tracks) {
           if (tracks.hasOwnProperty(key)) {
             const element = tracks[key];
@@ -131,7 +129,7 @@ module.exports = {
               element.artists ? element.artists[0].id : '',
               token
             );
-            const [hdjtrack, created] = await HDJTracks.findOrCreate({
+            const [hdjtrackFromPlaylist, trackCreated] = await HDJTracks.findOrCreate({
               where: {
                 track_name: element.track.name,
                 artist_name: element.track.artists[1]
