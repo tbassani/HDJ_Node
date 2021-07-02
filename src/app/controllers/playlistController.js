@@ -102,7 +102,7 @@ module.exports = {
           },
           defaults: {
             user_id: req.user_id,
-            playlist_id: hdj_playlist_id,
+            playlist_id: hdjPlaylist.dataValues.id,
             external_track_id: spotifyRawTrack.id,
             score: 0,
             track_name: spotifyRawTrack.name,
@@ -140,11 +140,11 @@ module.exports = {
               },
               defaults: {
                 user_id: req.user_id,
-                playlist_id: hdj_playlist_id,
+                playlist_id: hdjPlaylist.dataValues.id,
                 external_track_id: element.track.id,
                 score: 0,
-                was_played: false,
                 track_name: element.track.name,
+                was_played: false,
                 duration: element.track.duration_ms,
                 deleted_at: null,
                 album_name: element.track.album.name,
@@ -152,7 +152,7 @@ module.exports = {
                 artist_name: element.track.artists[1]
                   ? element.track.artists[0].name + ', ' + element.track.artists[1].name
                   : element.track.artists[0].name,
-                genre: spotifyRawArtist ? spotifyRawArtist.genres.join(', ') : '',
+                genre: spotifyRawArtist.genres.join(', '),
               },
             });
           }
