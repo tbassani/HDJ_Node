@@ -349,15 +349,12 @@ module.exports = {
           progress_ms: response.data.progress_ms,
         };
 
-        const topTracks = await TopTracks.findAll(
-          { was_played: true },
-          {
-            where: {
-              playlist_id: playlist_id,
-            },
-            raw: true,
-          }
-        );
+        const topTracks = await TopTracks.findAll({
+          where: {
+            playlist_id: playlist_id,
+          },
+          raw: true,
+        });
         console.log('FILTER TOP TRACKS');
         const topTracksCheck = topTracks.filter((track) => {
           return track.external_track_id === playingTrack.external_track_id;
@@ -406,7 +403,6 @@ module.exports = {
             },
           });
           for (const track of addedTopTracks) {
-            track;
             await TopTracks.create({
               user_id: req.user_id,
               playlist_id: playlist_id,
