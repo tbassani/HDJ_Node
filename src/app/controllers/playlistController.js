@@ -290,10 +290,10 @@ module.exports = {
       let duration = beginDuration;
       let i = 0;
       while (i < tracks.length && duration < 1800000) {
-        const index = newTopTracks.filter(
+        const filtered = newTopTracks.filter(
           (topTrack) => topTrack.external_track_id === tracks[i].external_track_id
         );
-        if (index < 0) {
+        if (filtered.length === 0) {
           duration = duration + tracks[i].duration;
           console.log('ADD TO QUEUE: ' + i);
           newTopTracks.push(tracks[i]);
