@@ -290,11 +290,14 @@ module.exports = {
       let duration = beginDuration;
       let i = 0;
       while (i < tracks.length && duration < 1800000) {
-        //if (tracks[i].external_track_id !== currentTrack.external_track_id) {
-        duration = duration + tracks[i].duration;
-        console.log('ADD TO QUEUE: ' + i);
-        newTopTracks.push(tracks[i]);
-        //}
+        const index = newTopTracks.filter(
+          (topTrack) => topTrack.external_track_id === tracks[i].external_track_id
+        );
+        if (index < 0) {
+          duration = duration + tracks[i].duration;
+          console.log('ADD TO QUEUE: ' + i);
+          newTopTracks.push(tracks[i]);
+        }
         i++;
       }
       return {
@@ -403,19 +406,25 @@ module.exports = {
             },
           });
           for (const track of addedTopTracks) {
-            await TopTracks.create({
-              user_id: req.user_id,
-              playlist_id: playlist_id,
-              external_track_id: track.external_track_id,
-              score: track.score,
-              track_name: track.track_name,
-              was_played: false,
-              duration: track.duration,
-              deleted_at: null,
-              album_name: track.album_name,
-              album_art: track.album_art,
-              artist_name: track.artist_name,
-              genre: track.genre,
+            await TopTracks.findOrCreate({
+              where: {
+                playlist_id: playlist_id,
+                external_track_id: track.external_track_id,
+              },
+              defaults: {
+                user_id: req.user_id,
+                playlist_id: playlist_id,
+                external_track_id: track.external_track_id,
+                score: track.score,
+                track_name: track.track_name,
+                was_played: false,
+                duration: track.duration,
+                deleted_at: null,
+                album_name: track.album_name,
+                album_art: track.album_art,
+                artist_name: track.artist_name,
+                genre: track.genre,
+              },
             });
           }
 
